@@ -14,6 +14,7 @@ function getInitialTheme() {
 
 export function useTheme() {
   const [theme, setTheme] = useState(getInitialTheme);
+  const [lightToggleCount, setLightToggleCount] = useState(0);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -21,8 +22,14 @@ export function useTheme() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    const next = theme === "dark" ? "light" : "dark";
+    if (next === "light") {
+      setLightToggleCount((c) => c + 1);
+    }
+    setTheme(next);
   };
 
-  return { theme, toggleTheme };
+  const easterEggUnlocked = lightToggleCount >= 3;
+
+  return { theme, toggleTheme, easterEggUnlocked };
 }

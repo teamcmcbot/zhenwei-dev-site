@@ -1,6 +1,11 @@
 import PropTypes from "prop-types";
 
-export default function Hero({ profile }) {
+export default function Hero({ profile, theme, easterEggUnlocked }) {
+  const displayImageUrl =
+    easterEggUnlocked && theme === "light"
+      ? profile.imageUrl?.replace("-silhouette", "")
+      : profile.imageUrl;
+
   return (
     <section className="hero card" aria-labelledby="hero-title">
       <div className="hero-content">
@@ -17,11 +22,11 @@ export default function Hero({ profile }) {
             </a>
           </div>
         </div>
-        {profile.imageUrl && (
+        {displayImageUrl && (
           <div className="hero-image-wrap">
             <img
-              className="hero-avatar"
-              src={profile.imageUrl}
+              className={`hero-avatar${easterEggUnlocked && theme === "light" ? " hero-avatar--revealed" : ""}`}
+              src={displayImageUrl}
               alt={profile.name ? `${profile.name} profile photo` : "Profile photo"}
             />
           </div>
@@ -32,6 +37,8 @@ export default function Hero({ profile }) {
 }
 
 Hero.propTypes = {
+  theme: PropTypes.oneOf(["dark", "light"]),
+  easterEggUnlocked: PropTypes.bool,
   profile: PropTypes.shape({
     role: PropTypes.string,
     headline: PropTypes.string,

@@ -13,7 +13,7 @@ import { useTheme } from "./hooks/useTheme";
 import { loadHomeData } from "./lib/data";
 
 export default function App() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, easterEggUnlocked } = useTheme();
   const [state, setState] = useState({
     loading: true,
     error: "",
@@ -57,7 +57,7 @@ export default function App() {
         )}
         {state.data && (
           <>
-            <Hero profile={state.data.profile} />
+            <Hero profile={state.data.profile} theme={theme} easterEggUnlocked={easterEggUnlocked} />
             <About about={state.data.about} />
             <Skills skills={state.data.skills} />
             <Certifications certifications={state.data.certifications} />
