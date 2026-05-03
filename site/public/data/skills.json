@@ -1,22 +1,151 @@
 [
   {
     "group": "Cloud",
-    "items": ["AWS", "S3", "CloudFront", "Route53", "IAM", "ACM"]
+    "items": [
+      "AWS",
+      "S3",
+      "CloudFront",
+      "Route53",
+      "IAM",
+      "ACM",
+      "API Gateway",
+      "Lambda",
+      "DynamoDB",
+      "SQS",
+      "SNS",
+      "SES",
+      "EventBridge",
+      "CloudWatch",
+      "RDS",
+      "EBS",
+      "ECR",
+      "ECS",
+      "EKS",
+      "VPC",
+      "ALB",
+      "WAF",
+      "Secrets Manager"
+    ]
   },
   {
     "group": "Infrastructure as Code",
-    "items": ["Terraform", "Remote State", "Reusable Modules", "Environment Variables"]
+    "items": [
+      "Terraform",
+      "Terraform Cloud",
+      "CloudFormation",
+      "AWS CDK",
+      "OpenTofu",
+      "Terragrunt"
+    ]
   },
   {
     "group": "CI/CD",
-    "items": ["GitHub Actions", "OIDC Federation", "S3 Sync", "CloudFront Invalidation"]
+    "items": [
+      "GitHub Actions",
+      "GitLab CI",
+      "Jenkins",
+      "SonarQube",
+      "Fortify",
+      "Veracode",
+      "Nexus"
+    ]
   },
   {
-    "group": "Containers and Runtime",
-    "items": ["Docker", "Kubernetes", "Linux", "Shell Scripting"]
+    "group": "Containers and Orchestration",
+    "items": [
+      "Docker",
+      "Docker Compose",
+      "Kubernetes",
+      "EKS",
+      "Helm",
+      "Argo CD",
+      "Nginx",
+      "WildFly",
+      "Tomcat"
+    ]
+  },
+  {
+    "group": "Programming and Backend",
+    "items": [
+      "Java",
+      "Spring Boot",
+      "Spring Batch",
+      "Python",
+      "Node.js",
+      "REST APIs",
+      "JWT Authentication",
+      "JPA",
+      "Hibernate",
+      "Maven",
+      "JUnit"
+    ]
+  },
+  {
+    "group": "Databases",
+    "items": [
+      "Oracle Database",
+      "PostgreSQL",
+      "DynamoDB",
+      "RDS",
+      "H2",
+      "SQL",
+      "Flyway"
+    ]
+  },
+  {
+    "group": "Frontend and Static Sites",
+    "items": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "React",
+      "Next.js",
+      "Static Website Hosting",
+      "Markdown"
+    ]
   },
   {
     "group": "Operations",
-    "items": ["Monitoring", "Alerting", "Incident Response", "Cost Awareness"]
+    "items": [
+      "Linux",
+      "Shell Scripting",
+      "Monitoring",
+      "Alerting",
+      "Incident Response",
+      "CloudWatch Logs",
+      "Log Analysis",
+      "Cost Awareness",
+      "Performance Troubleshooting"
+    ]
+  },
+  {
+    "group": "DevOps Practices",
+    "items": [
+      "Infrastructure Automation",
+      "CI/CD Pipeline Design",
+      "Branching Strategy",
+      "Environment Promotion",
+      "Secrets Management",
+      "Configuration Management",
+      "Blue/Green Deployment",
+      "Immutable Infrastructure",
+      "Release Management"
+    ]
+  },
+  {
+    "group": "Tools",
+    "items": [
+      "Git",
+      "GitHub",
+      "GitLab",
+      "VS Code",
+      "Eclipse",
+      "Postman",
+      "Insomnia",
+      "AWS CLI",
+      "kubectl",
+      "Maven",
+      "Docker CLI"
+    ]
   }
 ]

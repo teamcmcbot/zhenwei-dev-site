@@ -15,6 +15,14 @@ The site should feel dynamic to visitors, but remain simple and inexpensive to o
 
 This makes the website itself part of the DevOps portfolio: it demonstrates static hosting, CDN delivery, infrastructure as code, CI/CD, and data-driven frontend architecture.
 
+## Implementation Decisions (Locked for v1)
+
+- Navigation model: single-page scroll portfolio.
+- Visual direction: minimal professional.
+- Certifications link behavior: if `credentialUrl` is not empty and not `#`, open the link in a new tab.
+- Theme support: implement both dark and light mode, default to dark mode.
+- Architecture diagrams: defer for now and add in a later iteration.
+
 ## Recommended Architecture
 
 ```text
@@ -176,6 +184,11 @@ Purpose: skills grouped by discipline.
 ### `certifications.json`
 
 Purpose: certification cards and badges.
+
+Rendering rule:
+
+- If `credentialUrl` is a real URL, render a "View Credential" link with `target="_blank"` and `rel="noopener noreferrer"`.
+- If `credentialUrl` is `#` or empty, do not render the external credential link.
 
 ```json
 [
@@ -365,6 +378,85 @@ Purpose: contact links and call to action.
 
 ## Frontend Implementation Plan
 
+## Current Progress Snapshot
+
+Status legend:
+
+- [x] Completed
+- [ ] Not started
+- [~] In progress
+
+Completed so far:
+
+- [x] Vite + React project initialized in `site/`
+- [x] Shared data loader wired for first slice (`profile.json`, `about.json`)
+- [x] Single-page scroll baseline structure started
+- [x] Dark/light theme support implemented with dark default
+- [x] Icon-only theme toggle added to header
+- [x] Theme persistence implemented via localStorage
+- [x] First vertical slice shipped: Hero + About
+- [x] App-level loading and error states implemented for first slice
+- [x] Production build passes (`npm run build`)
+- [x] Slice 2 shipped: Skills + Certifications
+- [x] Slice 3 shipped: Experience + Projects
+- [x] Slice 4 shipped: AWS Static Hosting + Contact
+
+Still pending:
+
+- [ ] Full-section responsive polishing and final QA
+- [ ] Pipeline refinement for app-vs-data-only deployment paths
+
+## Implementation Slices (Small Steps Checklist)
+
+### Slice 1: Foundation + Hero/About (completed)
+
+- [x] Scaffold React app
+- [x] Add base layout and header
+- [x] Add theme system and icon-only toggle
+- [x] Fetch and render `profile.json` and `about.json`
+- [x] Add loading/error UI
+- [x] Verify build success
+
+### Slice 2: Skills + Certifications
+
+- [x] Extend loader to include `skills.json` and `certifications.json`
+- [x] Create `Skills` component
+- [x] Create `Certifications` component
+- [x] Implement credential link rule:
+  - [x] Render link only if `credentialUrl` is real (not empty and not `#`)
+  - [x] Open credential link in new tab (`target="_blank"` + `rel="noopener noreferrer"`)
+- [x] Add nav anchors for new sections
+- [x] Build and validate locally
+
+### Slice 3: Experience + Projects
+
+- [x] Extend loader to include `experiences.json` and `projects.json`
+- [x] Create `Experience` component
+- [x] Create `Projects` component
+- [x] Add responsive card/timeline treatment in minimal professional style
+- [x] Build and validate locally
+
+### Slice 4: AWS Static Hosting + Contact
+
+- [x] Extend loader to include `aws-static-hosting.json` and `contact.json`
+- [x] Create `AwsStaticHosting` component (text-first, no diagrams yet)
+- [x] Create `Contact` component
+- [x] Add section links in header
+- [x] Build and validate locally
+
+### Slice 5: UX and quality pass
+
+- [x] Empty-state handling per section
+- [x] Accessibility pass (headings, labels, focus, contrast)
+- [x] Mobile and tablet polish
+- [x] Lighthouse baseline check
+
+### Slice 6: Deployment readiness (manual trigger preserved)
+
+- [x] Ensure deploy workflow uses `site/dist` output
+- [x] Keep workflow as manual-only until Terraform apply and GitHub secrets/vars are set
+- [x] Perform first manual deploy smoke test once infra is ready
+
 ### Phase 1: Create Data Contract
 
 - Add the sample JSON files first.
@@ -380,6 +472,8 @@ Purpose: contact links and call to action.
 - Replace hardcoded HTML sections with React components.
 - Each section should load from the JSON data contract.
 - Keep the first screen as the real portfolio experience, not a marketing landing page.
+- Build as a single-page scroll experience with anchor-based section navigation.
+- Keep the overall style minimal and professional (clean typography, restrained color system, clear information hierarchy).
 
 Suggested component loading pattern:
 
@@ -429,6 +523,16 @@ The AWS Static Hosting section should be treated as a featured case study. It sh
 - Infrastructure components
 - CI/CD deployment flow
 - Data-only update demonstration
+
+For v1, keep this section text-first and defer architecture diagrams to a later iteration.
+
+### Phase 3.5: Theme System (Dark Default)
+
+- Implement both dark and light theme tokens using CSS variables.
+- Set dark mode as the default theme.
+- Add a simple theme toggle in the header.
+- Persist user preference in localStorage.
+- Respect system preference only when no saved user preference exists.
 
 ### Phase 4: Add Loading And Error States
 
@@ -493,6 +597,8 @@ Before considering the migration complete, validate:
 - Updating one JSON file can update the live site through the pipeline
 - Mobile layout remains readable and polished
 - Lighthouse basics are acceptable for performance and accessibility
+- Certifications with real `credentialUrl` open in a new tab; placeholder or empty URLs do not render credential links
+- Theme toggle works, defaults to dark mode, and persists between page reloads
 
 ## Acceptance Criteria
 
@@ -520,4 +626,4 @@ Possible later improvements:
 
 ## Immediate Next Step
 
-Generate the dummy JSON files first, then wire the current frontend to read them. After that, migrate the UI to Vite + React once the content contract feels right.
+Next: `terraform apply` and configure GitHub secrets/vars, then run the first manual deploy from GitHub Actions.

@@ -1,11 +1,12 @@
 {
   "name": "Zhenwei Seo",
   "domain": "zhenwei.dev",
-  "role": "DevOps Engineer",
-  "headline": "Building reliable delivery pipelines and cloud platforms that teams trust.",
-  "summary": "I design and automate infrastructure with Terraform, secure deployment pipelines with GitHub OIDC, and production-ready systems on AWS.",
-  "location": "Your City, Your Region",
+  "role": "DevOps / Cloud Engineer",
+  "headline": "Hello, I'm Zhenwei!",
+  "summary": "DevOps-focused engineer with 17+ years of backend experience, building automated CI/CD pipelines, Terraform-managed infrastructure, and cloud-native systems on AWS.",
+  "location": "Singapore",
   "resumeUrl": "/assets/resume-placeholder.pdf",
+  "imageUrl": "/assets/profile/profile-silhouette.png",
   "primaryAction": {
     "label": "View Projects",
     "href": "#projects"

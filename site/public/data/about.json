@@ -1,15 +1,17 @@
 {
   "title": "About",
   "paragraphs": [
-    "I focus on shipping fast without trading off security or reliability.",
-    "My work centers on infrastructure as code, CI/CD excellence, cloud-native architecture, and observability-first operations.",
-    "This portfolio is also a working DevOps showcase: static hosting, CDN delivery, Terraform-managed infrastructure, and automated deployment through GitHub Actions."
+    "I’m a software engineer with 17+ years of experience in backend development, specializing in building reliable APIs and scalable systems using Java and Spring-based technologies.",
+
+    "Over time, I’ve expanded into DevOps and Cloud Engineering, working hands-on with AWS, Docker, Kubernetes, and CI/CD pipelines. My focus is on automating infrastructure, improving deployment workflows, and building production-ready cloud platforms.",
+
+    "This portfolio is designed as a practical DevOps showcase, demonstrating how I apply Infrastructure as Code, secure CI/CD pipelines, and cloud-native architecture to deliver real-world systems."
   ],
   "focusAreas": [
-    "Infrastructure as Code",
-    "Secure CI/CD",
-    "AWS Static Hosting",
-    "CloudFront and DNS",
-    "Platform Reliability"
+    "Infrastructure as Code (Terraform)",
+    "Secure CI/CD (GitHub Actions, OIDC)",
+    "AWS Cloud Architecture",
+    "CloudFront, DNS and Edge Delivery",
+    "Platform Reliability and Automation"
   ]
 }

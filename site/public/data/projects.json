@@ -19,20 +19,21 @@
     }
   },
   {
-    "title": "Terraform CloudFront Foundation",
-    "slug": "terraform-cloudfront-foundation",
-    "status": "Planned",
-    "summary": "Reusable Terraform configuration for secure static web hosting on AWS.",
-    "problem": "Static sites often start simple but become inconsistent when DNS, TLS, caching, and bucket policies are configured manually.",
-    "solution": "Codify S3, CloudFront, Route53, IAM, and output values with Terraform.",
+    "title": "OpenRouter AI Chat Application (GreenBubble)",
+    "slug": "openrouter-ai-chat",
+    "status": "Completed",
+    "summary": "A modern AI chat application built with Next.js and powered by OpenRouter, supporting multiple LLM providers with real-time streaming and persistent chat history.",
+    "problem": "Provide a unified interface to interact with multiple AI models while managing cost, performance, and user experience.",
+    "solution": "Built a Next.js frontend integrated with OpenRouter API, implemented streaming responses, chat history persistence (Supabase), and a modular architecture supporting multiple models and providers.",
     "outcomes": [
-      "Repeatable infrastructure",
-      "Clear separation between app content and cloud resources",
-      "Auditable changes through Git history"
+      "Unified interface for multiple LLM providers",
+      "Real-time streaming responses for better UX",
+      "Persistent chat history with scalable backend",
+      "Optimized cost control via model selection"
     ],
-    "technologies": ["Terraform", "AWS", "S3", "CloudFront", "Route53", "ACM"],
+    "technologies": ["Next.js", "React", "OpenRouter", "Supabase", "TypeScript", "Zustand", "Vercel"],
     "links": {
-      "demo": "#",
+      "demo": "https://greenbubble-chat.vercel.app/",
       "repo": "#",
       "caseStudy": "#"
     }

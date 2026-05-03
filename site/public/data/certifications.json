@@ -1,18 +1,38 @@
 [
   {
-    "name": "AWS Certified Solutions Architect - Associate",
-    "issuer": "Amazon Web Services",
-    "status": "Planned or In Progress",
-    "issuedDate": "TBD",
-    "credentialUrl": "#",
-    "badgeImage": "/assets/certifications/aws-placeholder.svg"
+    "name": "CKA: Certified Kubernetes Administrator",
+    "issuer": "Cloud Native Computing Foundation",
+    "status": "Active",
+    "issuedDate": "2026-03-17",
+    "expirationDate": "2028-03-17",
+    "credentialUrl": "https://www.credly.com/badges/5b92eb6a-3a24-4625-ae1a-bb848b5bac75",
+    "badgeImage": "/assets/certifications/cka-certified-kubernetes-administrator.png"
   },
   {
-    "name": "Certified Kubernetes Administrator",
-    "issuer": "Cloud Native Computing Foundation",
-    "status": "Planned or In Progress",
-    "issuedDate": "TBD",
-    "credentialUrl": "#",
-    "badgeImage": "/assets/certifications/cka-placeholder.svg"
+    "name": "HashiCorp Certified: Terraform Associate (004)",
+    "issuer": "HashiCorp",
+    "status": "Active",
+    "issuedDate": "2026-01-09",
+    "expirationDate": "2028-01-09",
+    "credentialUrl": "https://www.credly.com/badges/8352ac29-00c5-49f5-9784-441dd3f3356c",
+    "badgeImage": "/assets/certifications/terraform-associate-004.png"
+  },
+  {
+    "name": "AWS Certified Developer – Associate",
+    "issuer": "Amazon Web Services",
+    "status": "Active",
+    "issuedDate": "2024-06-14",
+    "expirationDate": "2027-06-14",
+    "credentialUrl": "https://www.credly.com/badges/4aff28da-5302-4fc9-839a-87fe7cd012fc",
+    "badgeImage": "/assets/certifications/aws-certified-developer-associate.png"
+  },
+  {
+    "name": "AWS Certified Solutions Architect – Associate",
+    "issuer": "Amazon Web Services",
+    "status": "Active",
+    "issuedDate": "2023-12-05",
+    "expirationDate": "2026-12-05",
+    "credentialUrl": "https://www.credly.com/badges/58da3690-9f78-4332-9505-8e9a182ee658",
+    "badgeImage": "/assets/certifications/aws-certified-solutions-architect-associate.png"
   }
 ]
