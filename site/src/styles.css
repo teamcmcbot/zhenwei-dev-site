@@ -73,6 +73,7 @@ a {
 .site-header {
   position: sticky;
   top: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -190,6 +191,7 @@ h3 {
   object-fit: cover;
   border: 3px solid var(--accent);
   display: block;
+  background-color: #c8d0d8;
 }
 
 .hero-actions {
@@ -237,6 +239,12 @@ h3 {
   background: var(--surface-2);
   font-size: 0.9rem;
   color: var(--muted);
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.chips li:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .skills-grid {
@@ -251,6 +259,12 @@ h3 {
   border-radius: 10px;
   padding: 0.85rem;
   background: var(--surface-2);
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.skill-group:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 .skill-group .chips {
@@ -271,6 +285,12 @@ h3 {
   background: var(--surface-2);
   display: grid;
   gap: 0.45rem;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.cert-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 .cert-badge {
@@ -346,6 +366,12 @@ h3 {
   border-radius: 10px;
   padding: 0.9rem;
   background: var(--surface-2);
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.timeline-item:hover {
+  border-color: var(--accent);
+  transform: translateX(3px);
 }
 
 .timeline-head {
@@ -372,6 +398,14 @@ h3 {
   gap: 0.45rem;
 }
 
+.bullet-list li {
+  transition: color 150ms ease;
+}
+
+.bullet-list li:hover {
+  color: var(--text);
+}
+
 .project-grid {
   margin-top: 1rem;
   display: grid;
@@ -386,6 +420,12 @@ h3 {
   background: var(--surface-2);
   display: grid;
   gap: 0.55rem;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.project-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 .project-header {
@@ -422,6 +462,12 @@ h3 {
   border-radius: 10px;
   padding: 0.95rem;
   background: var(--surface-2);
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.aws-panel:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 .pipeline-panel {
@@ -434,6 +480,14 @@ h3 {
   color: var(--muted);
   display: grid;
   gap: 0.45rem;
+}
+
+.ordered-list li {
+  transition: color 150ms ease;
+}
+
+.ordered-list li:hover {
+  color: var(--text);
 }
 
 .contact-links {
