@@ -1,0 +1,18 @@
+[
+  {
+    "name": "AWS Certified Solutions Architect - Associate",
+    "issuer": "Amazon Web Services",
+    "status": "Planned or In Progress",
+    "issuedDate": "TBD",
+    "credentialUrl": "#",
+    "badgeImage": "/assets/certifications/aws-placeholder.svg"
+  },
+  {
+    "name": "Certified Kubernetes Administrator",
+    "issuer": "Cloud Native Computing Foundation",
+    "status": "Planned or In Progress",
+    "issuedDate": "TBD",
+    "credentialUrl": "#",
+    "badgeImage": "/assets/certifications/cka-placeholder.svg"
+  }
+]

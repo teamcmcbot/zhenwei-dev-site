@@ -1,0 +1,15 @@
+{
+  "title": "About",
+  "paragraphs": [
+    "I focus on shipping fast without trading off security or reliability.",
+    "My work centers on infrastructure as code, CI/CD excellence, cloud-native architecture, and observability-first operations.",
+    "This portfolio is also a working DevOps showcase: static hosting, CDN delivery, Terraform-managed infrastructure, and automated deployment through GitHub Actions."
+  ],
+  "focusAreas": [
+    "Infrastructure as Code",
+    "Secure CI/CD",
+    "AWS Static Hosting",
+    "CloudFront and DNS",
+    "Platform Reliability"
+  ]
+}

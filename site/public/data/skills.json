@@ -1,0 +1,22 @@
+[
+  {
+    "group": "Cloud",
+    "items": ["AWS", "S3", "CloudFront", "Route53", "IAM", "ACM"]
+  },
+  {
+    "group": "Infrastructure as Code",
+    "items": ["Terraform", "Remote State", "Reusable Modules", "Environment Variables"]
+  },
+  {
+    "group": "CI/CD",
+    "items": ["GitHub Actions", "OIDC Federation", "S3 Sync", "CloudFront Invalidation"]
+  },
+  {
+    "group": "Containers and Runtime",
+    "items": ["Docker", "Kubernetes", "Linux", "Shell Scripting"]
+  },
+  {
+    "group": "Operations",
+    "items": ["Monitoring", "Alerting", "Incident Response", "Cost Awareness"]
+  }
+]

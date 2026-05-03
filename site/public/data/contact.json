@@ -1,0 +1,21 @@
+{
+  "title": "Contact",
+  "message": "Interested in DevOps, cloud infrastructure, or platform engineering work? Let us connect.",
+  "links": [
+    {
+      "label": "Email",
+      "href": "mailto:hello@example.com",
+      "type": "email"
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://www.linkedin.com/in/example",
+      "type": "social"
+    },
+    {
+      "label": "GitHub",
+      "href": "https://github.com/example",
+      "type": "social"
+    }
+  ]
+}

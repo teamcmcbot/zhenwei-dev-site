@@ -1,0 +1,28 @@
+[
+  {
+    "company": "Example Cloud Platform Team",
+    "role": "DevOps Engineer",
+    "location": "Remote",
+    "period": "2024 - Present",
+    "summary": "Supported cloud infrastructure, deployment automation, and operational reliability for internal engineering teams.",
+    "highlights": [
+      "Built Terraform workflows for repeatable AWS infrastructure provisioning.",
+      "Implemented GitHub Actions deployment pipelines using OIDC instead of long-lived AWS keys.",
+      "Improved deployment confidence with automated validation and rollback-oriented release practices."
+    ],
+    "technologies": ["AWS", "Terraform", "GitHub Actions", "CloudFront", "S3", "IAM"]
+  },
+  {
+    "company": "Example Infrastructure Operations",
+    "role": "Platform Support Engineer",
+    "location": "Your City",
+    "period": "2022 - 2024",
+    "summary": "Worked on Linux systems, automation scripts, monitoring, and service reliability improvements.",
+    "highlights": [
+      "Automated recurring operational tasks with shell scripts.",
+      "Helped standardize deployment checklists and environment configuration.",
+      "Investigated production issues using logs, metrics, and infrastructure state."
+    ],
+    "technologies": ["Linux", "Bash", "Docker", "Monitoring", "Networking"]
+  }
+]

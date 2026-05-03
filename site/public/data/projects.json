@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Static Portfolio on AWS",
+    "slug": "aws-static-portfolio",
+    "status": "In Progress",
+    "summary": "A data-driven portfolio site hosted on S3 and CloudFront with Terraform-managed infrastructure and GitHub Actions deployment.",
+    "problem": "Create a fast, inexpensive portfolio that also demonstrates real DevOps practices.",
+    "solution": "Use a static React app, JSON content files, S3 private origin, CloudFront CDN, Route53 DNS, ACM TLS, and OIDC-based GitHub Actions deployment.",
+    "outcomes": [
+      "Low-cost global static hosting",
+      "Content updates through version-controlled JSON files",
+      "No long-lived AWS credentials in CI/CD"
+    ],
+    "technologies": ["React", "AWS S3", "CloudFront", "Route53", "Terraform", "GitHub Actions", "OIDC"],
+    "links": {
+      "demo": "https://zhenwei.dev",
+      "repo": "#",
+      "caseStudy": "#aws-static-hosting"
+    }
+  },
+  {
+    "title": "Terraform CloudFront Foundation",
+    "slug": "terraform-cloudfront-foundation",
+    "status": "Planned",
+    "summary": "Reusable Terraform configuration for secure static web hosting on AWS.",
+    "problem": "Static sites often start simple but become inconsistent when DNS, TLS, caching, and bucket policies are configured manually.",
+    "solution": "Codify S3, CloudFront, Route53, IAM, and output values with Terraform.",
+    "outcomes": [
+      "Repeatable infrastructure",
+      "Clear separation between app content and cloud resources",
+      "Auditable changes through Git history"
+    ],
+    "technologies": ["Terraform", "AWS", "S3", "CloudFront", "Route53", "ACM"],
+    "links": {
+      "demo": "#",
+      "repo": "#",
+      "caseStudy": "#"
+    }
+  }
+]

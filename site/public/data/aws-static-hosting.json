@@ -1,0 +1,48 @@
+{
+  "title": "AWS Static Hosting Architecture",
+  "summary": "This website is intentionally built as a static, data-driven app to demonstrate practical AWS hosting and deployment patterns.",
+  "requestFlow": [
+    "Visitor requests zhenwei.dev",
+    "Route53 resolves the domain",
+    "CloudFront serves cached assets over HTTPS",
+    "CloudFront retrieves origin files from S3 when needed",
+    "React loads JSON files from /data and renders the portfolio"
+  ],
+  "components": [
+    {
+      "name": "S3",
+      "purpose": "Stores the built React app and JSON content files."
+    },
+    {
+      "name": "CloudFront",
+      "purpose": "Provides CDN caching, HTTPS entry point, and SPA routing behavior."
+    },
+    {
+      "name": "Route53",
+      "purpose": "Maps zhenwei.dev to the CloudFront distribution."
+    },
+    {
+      "name": "ACM",
+      "purpose": "Provides the TLS certificate for HTTPS."
+    },
+    {
+      "name": "GitHub Actions",
+      "purpose": "Builds and deploys the app and JSON content after changes are merged."
+    },
+    {
+      "name": "OIDC + IAM",
+      "purpose": "Allows GitHub Actions to deploy without storing long-lived AWS access keys."
+    }
+  ],
+  "pipelineDemo": {
+    "title": "Content Update Demo",
+    "steps": [
+      "Update or add a JSON file under public/data",
+      "Open a pull request and review the content change",
+      "Merge to main",
+      "GitHub Actions syncs the changed data files to S3",
+      "CloudFront cache is invalidated for the affected paths",
+      "The live website renders the new content without changing application code"
+    ]
+  }
+}
