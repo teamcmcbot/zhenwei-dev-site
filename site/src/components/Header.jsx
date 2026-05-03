@@ -38,7 +38,7 @@ export default function Header({ theme, toggleTheme }) {
 
   return (
     <header className="site-header">
-      <a href="#top" className="brand">zhenwei.dev</a>
+      <a href="/" className="brand">zhenwei.dev</a>
       <nav aria-label="Site navigation">
         <a href="#about">About</a>
         <a href="#skills">Skills</a>

@@ -24,6 +24,34 @@ export default function Certifications({ certifications }) {
 
           return (
             <article key={certification.name} className="cert-card">
+              <div className="cert-card-body">
+              {hasCredentialLink ? (
+                <h3>
+                  <a
+                    className="cert-title-link"
+                    href={certification.credentialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {certification.name}
+                  </a>
+                </h3>
+              ) : (
+                <h3>{certification.name}</h3>
+              )}
+              <p className="meta">{certification.issuer}</p>
+              <p className="meta">Issued: {certification.issuedDate}</p>
+              {hasCredentialLink && (
+                <a
+                  className="credential-link"
+                  href={certification.credentialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View Credential
+                </a>
+              )}
+              </div>
               {hasBadgeImage &&
                 (hasCredentialLink ? (
                   <a
@@ -48,33 +76,6 @@ export default function Certifications({ certifications }) {
                     loading="lazy"
                   />
                 ))}
-              {hasCredentialLink ? (
-                <h3>
-                  <a
-                    className="cert-title-link"
-                    href={certification.credentialUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {certification.name}
-                  </a>
-                </h3>
-              ) : (
-                <h3>{certification.name}</h3>
-              )}
-              <p className="meta">{certification.issuer}</p>
-              <p className="meta">Status: {certification.status}</p>
-              <p className="meta">Issued: {certification.issuedDate}</p>
-              {hasCredentialLink && (
-                <a
-                  className="credential-link"
-                  href={certification.credentialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View Credential
-                </a>
-              )}
             </article>
           );
         })}

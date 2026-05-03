@@ -290,9 +290,19 @@ h3 {
   border-radius: 10px;
   padding: 0.95rem;
   background: var(--surface-2);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.cert-card-body {
   display: grid;
   gap: 0.45rem;
-  transition: border-color 150ms ease, transform 150ms ease;
+  flex: 1;
+  min-width: 0;
 }
 
 .cert-card:hover {
