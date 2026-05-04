@@ -1,4 +1,5 @@
 const DATA_PATHS = {
+  intro: "/data/intro.json",
   profile: "/data/profile.json",
   about: "/data/about.json",
   skills: "/data/skills.json",
@@ -20,7 +21,8 @@ async function loadJson(path) {
 }
 
 export async function loadHomeData() {
-  const [profile, about, skills, certifications, experiences, projects, awsStaticHosting, contact] = await Promise.all([
+  const [intro, profile, about, skills, certifications, experiences, projects, awsStaticHosting, contact] = await Promise.all([
+    loadJson(DATA_PATHS.intro),
     loadJson(DATA_PATHS.profile),
     loadJson(DATA_PATHS.about),
     loadJson(DATA_PATHS.skills),
@@ -32,6 +34,7 @@ export async function loadHomeData() {
   ]);
 
   return {
+    intro,
     profile,
     about,
     skills,

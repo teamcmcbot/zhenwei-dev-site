@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
-import Hero from "./components/Hero";
-import About from "./components/About";
+import IntroTerminal from "./components/IntroTerminal";
 import Skills from "./components/Skills";
 import Certifications from "./components/Certifications";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
 import AwsStaticHosting from "./components/AwsStaticHosting";
-import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import { useTheme } from "./hooks/useTheme";
 import { loadHomeData } from "./lib/data";
@@ -57,14 +55,12 @@ export default function App() {
         )}
         {state.data && (
           <>
-            <Hero profile={state.data.profile} theme={theme} easterEggUnlocked={easterEggUnlocked} />
-            <About about={state.data.about} />
+            <IntroTerminal intro={state.data.intro} theme={theme} easterEggUnlocked={easterEggUnlocked} />
             <Skills skills={state.data.skills} />
             <Certifications certifications={state.data.certifications} />
             <Experience experiences={state.data.experiences} />
             <Projects projects={state.data.projects} />
             <AwsStaticHosting data={state.data.awsStaticHosting} />
-            <Contact data={state.data.contact} />
           </>
         )}
       </main>

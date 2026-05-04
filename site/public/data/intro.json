@@ -1,0 +1,101 @@
+{
+  "identity": {
+    "name": "Zhenwei Seo",
+    "domain": "zhenwei.dev",
+    "role": "DevOps / Cloud Engineer",
+    "headline": "Zhenwei SEO",
+    "summary": "DevOps-focused engineer with 17+ years of backend experience, building automated CI/CD pipelines, Terraform-managed infrastructure, and cloud-native systems on AWS.",
+    "location": "Singapore",
+    "imageUrl": "/assets/profile/profile-silhouette.png",
+    "primaryAction": {
+      "label": "Run projects",
+      "href": "#projects"
+    },
+    "secondaryAction": {
+      "label": "Open contact",
+      "href": "#contact"
+    }
+  },
+  "terminal": {
+    "title": "visitor@zhenwei.dev - portfolio",
+    "prompt": "visitor@zhenwei.dev:~$",
+    "welcomeLines": [
+      "Portfolio console initialized.",
+      "Type a command or use the command deck to inspect profile, contact, and work signals."
+    ],
+    "commands": [
+      {
+        "name": "help",
+        "label": "help",
+        "description": "List available commands"
+      },
+      {
+        "name": "about",
+        "label": "about",
+        "description": "Read the short profile"
+      },
+      {
+        "name": "skills",
+        "label": "skills",
+        "description": "Scroll to the skills system panel"
+      },
+      {
+        "name": "certs",
+        "label": "certs",
+        "description": "View certifications and credentials"
+      },
+      {
+        "name": "experience",
+        "label": "experience",
+        "description": "Jump to experience highlights"
+      },
+      {
+        "name": "projects",
+        "label": "projects",
+        "description": "Jump to project evidence"
+      },
+      {
+        "name": "clear",
+        "label": "clear",
+        "description": "Reset the terminal output"
+      }
+    ]
+  },
+  "about": {
+    "title": "About",
+    "kicker": "Backend depth, DevOps focus, cloud delivery.",
+    "paragraphs": [
+      "I'm a software engineer with 17+ years of experience in backend development, specializing in building reliable APIs and scalable systems using Java and Spring-based technologies.",
+      "Over time, I've expanded into DevOps and Cloud Engineering, working hands-on with AWS, Docker, Kubernetes, and CI/CD pipelines. My focus is on automating infrastructure, improving deployment workflows, and building production-ready cloud platforms.",
+      "This portfolio is designed as a practical DevOps showcase, demonstrating how I apply Infrastructure as Code, secure CI/CD pipelines, and cloud-native architecture to deliver real-world systems."
+    ],
+    "focusAreas": [
+      "Infrastructure as Code",
+      "Secure CI/CD",
+      "AWS Architecture",
+      "Edge Delivery",
+      "Platform Automation"
+    ]
+  },
+  "contact": {
+    "title": "Contact",
+    "message": "Interested in DevOps, cloud infrastructure, or platform engineering work? Let us connect.",
+    "links": [
+      {
+        "label": "Email",
+        "href": "mailto:hello@example.com",
+        "type": "email"
+      },
+      {
+        "label": "LinkedIn",
+        "href": "https://www.linkedin.com/in/example",
+        "type": "social"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/example",
+        "type": "social"
+      }
+    ]
+  }
+}
