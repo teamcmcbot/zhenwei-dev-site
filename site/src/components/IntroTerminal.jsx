@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 
 function isExternalLink(href) {
@@ -20,6 +20,13 @@ function canonicalizeCommand(value) {
   };
 
   return commandAliases[value] || value;
+}
+
+function getPreviewItems(items = [], limit = 3) {
+  return {
+    visible: items.slice(0, limit),
+    remaining: Math.max(items.length - limit, 0)
+  };
 }
 
 function ContactIcon({ type, label }) {
@@ -75,11 +82,14 @@ function scrollToSection(sectionId) {
   globalThis.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
 }
 
-export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
+export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills, certifications, experiences, projects }) {
   const [activeCommand, setActiveCommand] = useState("welcome");
   const [inputValue, setInputValue] = useState("");
   const [unknownCommand, setUnknownCommand] = useState("");
+  const [outputHighlighted, setOutputHighlighted] = useState(false);
   const outputRef = useRef(null);
+  const inputRef = useRef(null);
+  const attentionTimeoutRef = useRef(null);
 
   const commands = intro.terminal?.commands || [];
   const commandMap = useMemo(
@@ -92,9 +102,20 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
       ? intro.identity.imageUrl?.replace("-silhouette", "")
       : intro.identity.imageUrl;
 
-  function focusOutput() {
+  useEffect(() => () => {
+    globalThis.clearTimeout(attentionTimeoutRef.current);
+  }, []);
+
+  function refocusTerminalInput() {
+    globalThis.clearTimeout(attentionTimeoutRef.current);
+    setOutputHighlighted(true);
+
+    attentionTimeoutRef.current = globalThis.setTimeout(() => {
+      setOutputHighlighted(false);
+    }, 900);
+
     globalThis.setTimeout(() => {
-      outputRef.current?.focus();
+      inputRef.current?.focus();
     }, 0);
   }
 
@@ -109,38 +130,27 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
     if (canonical === "clear") {
       setUnknownCommand("");
       setActiveCommand("welcome");
-      focusOutput();
+      refocusTerminalInput();
       return;
     }
 
     if (canonical === "contact") {
       setUnknownCommand("");
       setActiveCommand("contact");
-      focusOutput();
+      refocusTerminalInput();
       return;
     }
 
     if (!commandMap.has(canonical)) {
       setUnknownCommand(normalized);
       setActiveCommand("unknown");
-      focusOutput();
+      refocusTerminalInput();
       return;
     }
 
     setUnknownCommand("");
     setActiveCommand(canonical);
-
-    if (canonical === "skills" || canonical === "projects" || canonical === "experience") {
-      scrollToSection(canonical);
-      return;
-    }
-
-    if (canonical === "certs") {
-      scrollToSection("certifications");
-      return;
-    }
-
-    focusOutput();
+    refocusTerminalInput();
   }
 
   function handleSubmit(event) {
@@ -221,11 +231,175 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
     );
   }
 
-  function renderJumpOutput(label) {
+  function renderSeeMore(sectionId, label) {
     return (
-      <div className="terminal-output-block">
-        <p className="terminal-line terminal-line--success">Opening {label}...</p>
-        <p className="terminal-line">Scroll position updated. Continue down the page for the full section.</p>
+      <div className="terminal-action-row">
+        <button type="button" className="terminal-see-more" onClick={() => scrollToSection(sectionId)}>
+          See more in {label}
+        </button>
+      </div>
+    );
+  }
+
+  function renderRemainderChip(count) {
+    if (count <= 0) {
+      return null;
+    }
+
+    return <li className="terminal-preview-chip terminal-preview-chip--more">+{count} more</li>;
+  }
+
+  function renderPreviewChips(items, limit, ariaLabel) {
+    const { visible, remaining } = getPreviewItems(items, limit);
+
+    return (
+      <ul className="terminal-preview-chips" aria-label={ariaLabel}>
+        {visible.map((item) => (
+          <li key={item} className="terminal-preview-chip">{item}</li>
+        ))}
+        {renderRemainderChip(remaining)}
+      </ul>
+    );
+  }
+
+  function renderSkillsOutput() {
+    const totalSkills = skills.reduce((total, group) => total + group.items.length, 0);
+
+    return (
+      <div className="terminal-output-block terminal-output-block--content">
+        <p className="terminal-line terminal-line--success">Skills index: {skills.length} groups / {totalSkills} signals</p>
+        <div className="terminal-record-list">
+          {skills.map((group) => (
+            <article key={group.group} className="terminal-record terminal-record--compact">
+              <h3>{group.group}</h3>
+              {renderPreviewChips(group.items, 5, `${group.group} skill preview`)}
+            </article>
+          ))}
+        </div>
+        {renderSeeMore("skills", "Skills")}
+      </div>
+    );
+  }
+
+  function renderCertificationsOutput() {
+    return (
+      <div className="terminal-output-block terminal-output-block--content">
+        <p className="terminal-line terminal-line--success">Certification registry: {certifications.length} credentials</p>
+        <div className="terminal-record-list">
+          {certifications.map((certification) => {
+            const hasCredentialLink = isExternalLink(certification.credentialUrl);
+            const hasBadgeImage = Boolean(certification.badgeImage);
+
+            return (
+              <article key={certification.name} className="terminal-record terminal-cert-record">
+                <div className="terminal-cert-content">
+                  <h3>{certification.name}</h3>
+                  <p className="terminal-meta">{certification.issuer}</p>
+                  <p className="terminal-meta">Issued {certification.issuedDate} / Expires {certification.expirationDate}</p>
+                  {hasCredentialLink && (
+                    <a className="terminal-inline-link" href={certification.credentialUrl} target="_blank" rel="noopener noreferrer">
+                      View credential
+                    </a>
+                  )}
+                </div>
+                {hasBadgeImage &&
+                  (hasCredentialLink ? (
+                    <a
+                      className="terminal-cert-badge-link"
+                      href={certification.credentialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Open credential for ${certification.name}`}
+                    >
+                      <img className="terminal-cert-badge" src={certification.badgeImage} alt={`${certification.name} badge`} loading="lazy" />
+                    </a>
+                  ) : (
+                    <img className="terminal-cert-badge" src={certification.badgeImage} alt={`${certification.name} badge`} loading="lazy" />
+                  ))}
+              </article>
+            );
+          })}
+        </div>
+        {renderSeeMore("certifications", "Certifications")}
+      </div>
+    );
+  }
+
+  function renderExperienceOutput() {
+    return (
+      <div className="terminal-output-block terminal-output-block--content">
+        <p className="terminal-line terminal-line--success">Experience timeline: {experiences.length} roles</p>
+        <div className="terminal-record-list">
+          {experiences.map((item) => {
+            const { visible: highlights, remaining } = getPreviewItems(item.highlights, 2);
+
+            return (
+              <article key={`${item.company}-${item.period}`} className="terminal-record">
+                <div className="terminal-record-head">
+                  <h3>{item.role}</h3>
+                  <span>{item.period}</span>
+                </div>
+                <p className="terminal-meta">{item.company} / {item.location}</p>
+                <p className="terminal-paragraph">{item.summary}</p>
+                <ul className="terminal-bullet-list">
+                  {highlights.map((highlight) => (
+                    <li key={highlight}>{highlight}</li>
+                  ))}
+                  {remaining > 0 && <li className="terminal-muted">+{remaining} more highlights</li>}
+                </ul>
+                {renderPreviewChips(item.technologies, 5, `${item.company} technology preview`)}
+              </article>
+            );
+          })}
+        </div>
+        {renderSeeMore("experience", "Experience")}
+      </div>
+    );
+  }
+
+  function renderProjectsOutput() {
+    return (
+      <div className="terminal-output-block terminal-output-block--content">
+        <p className="terminal-line terminal-line--success">Project evidence: {projects.length} builds</p>
+        <div className="terminal-record-list">
+          {projects.map((project) => {
+            const { visible: outcomes, remaining } = getPreviewItems(project.outcomes, 2);
+            const hasDemoLink = isExternalLink(project.links?.demo);
+            const hasRepoLink = isExternalLink(project.links?.repo);
+
+            return (
+              <article key={project.slug} className="terminal-record">
+                <div className="terminal-record-head">
+                  <h3>{project.title}</h3>
+                  <span>{project.status}</span>
+                </div>
+                <p className="terminal-paragraph">{project.summary}</p>
+                <ul className="terminal-bullet-list">
+                  {outcomes.map((outcome) => (
+                    <li key={outcome}>{outcome}</li>
+                  ))}
+                  {remaining > 0 && <li className="terminal-muted">+{remaining} more outcomes</li>}
+                </ul>
+                {renderPreviewChips(project.technologies, 5, `${project.title} technology preview`)}
+                {(hasDemoLink || hasRepoLink) && (
+                  <div className="terminal-link-row">
+                    {hasDemoLink && (
+                      <a className="terminal-inline-link" href={project.links.demo} target="_blank" rel="noopener noreferrer">
+                        Live demo
+                      </a>
+                    )}
+                    {hasRepoLink && (
+                      <a className="terminal-inline-link" href={project.links.repo} target="_blank" rel="noopener noreferrer">
+                        Repository
+                      </a>
+                    )}
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+        {renderSeeMore("projects", "Projects")}
       </div>
     );
   }
@@ -248,13 +422,13 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
       case "contact":
         return renderContactOutput();
       case "skills":
-        return renderJumpOutput("skills");
+        return renderSkillsOutput();
       case "certs":
-        return renderJumpOutput("certifications");
+        return renderCertificationsOutput();
       case "experience":
-        return renderJumpOutput("experience");
+        return renderExperienceOutput();
       case "projects":
-        return renderJumpOutput("projects");
+        return renderProjectsOutput();
       case "unknown":
         return renderUnknownOutput();
       default:
@@ -329,7 +503,12 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
               <p>{intro.terminal?.title}</p>
             </div>
             <div className="terminal-body">
-              <div className="terminal-output" ref={outputRef} tabIndex="-1" aria-live="polite">
+              <div
+                className={outputHighlighted ? "terminal-output terminal-output--attention" : "terminal-output"}
+                ref={outputRef}
+                tabIndex="-1"
+                aria-live="polite"
+              >
                 <p className="terminal-prompt"><span>{intro.terminal?.prompt}</span> {activeCommand === "welcome" ? "init" : activeCommand}</p>
                 {renderOutput()}
               </div>
@@ -338,6 +517,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
                 <span aria-hidden="true">{intro.terminal?.prompt}</span>
                 <input
                   id="terminal-command"
+                  ref={inputRef}
                   type="text"
                   value={inputValue}
                   onChange={(event) => setInputValue(event.target.value)}
@@ -373,6 +553,51 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked }) {
 IntroTerminal.propTypes = {
   theme: PropTypes.oneOf(["dark", "light"]),
   easterEggUnlocked: PropTypes.bool,
+  skills: PropTypes.arrayOf(
+    PropTypes.shape({
+      group: PropTypes.string.isRequired,
+      items: PropTypes.arrayOf(PropTypes.string).isRequired
+    })
+  ).isRequired,
+  certifications: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      issuer: PropTypes.string.isRequired,
+      status: PropTypes.string.isRequired,
+      issuedDate: PropTypes.string.isRequired,
+      expirationDate: PropTypes.string.isRequired,
+      credentialUrl: PropTypes.string,
+      badgeImage: PropTypes.string
+    })
+  ).isRequired,
+  experiences: PropTypes.arrayOf(
+    PropTypes.shape({
+      company: PropTypes.string.isRequired,
+      role: PropTypes.string.isRequired,
+      location: PropTypes.string.isRequired,
+      period: PropTypes.string.isRequired,
+      summary: PropTypes.string.isRequired,
+      highlights: PropTypes.arrayOf(PropTypes.string).isRequired,
+      technologies: PropTypes.arrayOf(PropTypes.string).isRequired
+    })
+  ).isRequired,
+  projects: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      slug: PropTypes.string.isRequired,
+      status: PropTypes.string.isRequired,
+      summary: PropTypes.string.isRequired,
+      problem: PropTypes.string.isRequired,
+      solution: PropTypes.string.isRequired,
+      outcomes: PropTypes.arrayOf(PropTypes.string).isRequired,
+      technologies: PropTypes.arrayOf(PropTypes.string).isRequired,
+      links: PropTypes.shape({
+        demo: PropTypes.string,
+        repo: PropTypes.string,
+        caseStudy: PropTypes.string
+      })
+    })
+  ).isRequired,
   intro: PropTypes.shape({
     identity: PropTypes.shape({
       name: PropTypes.string,

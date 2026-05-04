@@ -547,6 +547,14 @@ h3 {
   min-height: 0;
   overflow: auto;
   padding-right: 0.3rem;
+  border-radius: 8px;
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+  transition: outline-color 180ms ease;
+}
+
+.terminal-output--attention {
+  outline-color: var(--terminal-green);
 }
 
 .terminal-prompt,
@@ -623,6 +631,170 @@ h3 {
 .command-card small {
   color: var(--muted);
   line-height: 1.45;
+}
+
+.terminal-record-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.terminal-record {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.8rem;
+  background: color-mix(in srgb, var(--terminal-panel-2) 66%, transparent);
+}
+
+.terminal-record--compact {
+  gap: 0.45rem;
+}
+
+.terminal-record h3 {
+  color: var(--terminal-cyan);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.terminal-cert-record {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.terminal-cert-content {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.terminal-cert-badge-link {
+  display: inline-flex;
+  border-radius: 8px;
+}
+
+.terminal-cert-badge {
+  width: clamp(4.75rem, 9vw, 6.25rem);
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--terminal-bg) 58%, transparent);
+}
+
+.terminal-record-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.terminal-record-head span {
+  max-width: 10rem;
+  border: 1px solid color-mix(in srgb, var(--terminal-green) 55%, var(--line));
+  border-radius: 999px;
+  padding: 0.16rem 0.45rem;
+  color: var(--terminal-green);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.terminal-meta,
+.terminal-muted {
+  margin: 0;
+  color: var(--muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.terminal-preview-chips {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.terminal-preview-chip {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.22rem 0.48rem;
+  background: color-mix(in srgb, var(--terminal-bg) 64%, transparent);
+  color: var(--muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.terminal-preview-chip--more {
+  color: var(--terminal-amber);
+}
+
+.terminal-bullet-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.terminal-bullet-list li {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.terminal-bullet-list li::marker {
+  color: var(--terminal-green);
+}
+
+.terminal-link-row,
+.terminal-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.terminal-inline-link,
+.terminal-see-more {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 0.65rem;
+  background: color-mix(in srgb, var(--terminal-panel-2) 74%, transparent);
+  color: var(--text);
+  font: inherit;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  text-decoration: none;
+}
+
+.terminal-see-more {
+  cursor: pointer;
+}
+
+.terminal-inline-link:hover,
+.terminal-see-more:hover {
+  border-color: var(--terminal-green);
+  color: var(--terminal-green);
+}
+
+@media (max-width: 560px) {
+  .terminal-cert-record {
+    grid-template-columns: 1fr;
+  }
+
+  .terminal-cert-badge,
+  .terminal-cert-badge-link {
+    justify-self: start;
+  }
 }
 
 .terminal-input-row {

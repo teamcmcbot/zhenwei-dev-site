@@ -37,7 +37,7 @@
       {
         "name": "skills",
         "label": "skills",
-        "description": "Scroll to the skills system panel"
+        "description": "Preview skill groups"
       },
       {
         "name": "certs",
@@ -47,12 +47,12 @@
       {
         "name": "experience",
         "label": "experience",
-        "description": "Jump to experience highlights"
+        "description": "Preview experience highlights"
       },
       {
         "name": "projects",
         "label": "projects",
-        "description": "Jump to project evidence"
+        "description": "Preview project evidence"
       },
       {
         "name": "clear",

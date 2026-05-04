@@ -55,7 +55,15 @@ export default function App() {
         )}
         {state.data && (
           <>
-            <IntroTerminal intro={state.data.intro} theme={theme} easterEggUnlocked={easterEggUnlocked} />
+            <IntroTerminal
+              intro={state.data.intro}
+              theme={theme}
+              easterEggUnlocked={easterEggUnlocked}
+              skills={state.data.skills}
+              certifications={state.data.certifications}
+              experiences={state.data.experiences}
+              projects={state.data.projects}
+            />
             <Skills skills={state.data.skills} />
             <Certifications certifications={state.data.certifications} />
             <Experience experiences={state.data.experiences} />
