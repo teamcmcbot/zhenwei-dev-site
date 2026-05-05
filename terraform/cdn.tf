@@ -47,12 +47,11 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
 
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
+    // AWS managed CachingOptimized policy — recommended for S3 origins.
+    // Sets min_ttl=1, default_ttl=86400, max_ttl=31536000 and excludes headers/cookies/query strings
+    // from the cache key, maximising hit rate while still honouring Cache-Control from S3.
+    // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html#managed-cache-caching-optimized
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CachingOptimized
   }
 
   custom_error_response {

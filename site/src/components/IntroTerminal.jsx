@@ -464,7 +464,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
             <span>{intro.identity.domain}</span>
             <span>{intro.identity.location}</span>
           </div>
-          <div className="intro-identity-row">
+          <div className="intro-identity-name-row">
             {displayImageUrl && (
               <div className="intro-avatar-frame">
                 <img
@@ -474,7 +474,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
                 />
               </div>
             )}
-            <div>
+            <div className="intro-identity-name-col">
               <p className="eyebrow">{intro.identity.role}</p>
               <h1 id="intro-title">{intro.identity.headline}</h1>
             </div>

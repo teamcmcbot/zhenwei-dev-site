@@ -432,7 +432,7 @@ h3 {
   overflow-wrap: anywhere;
 }
 
-.intro-identity-row {
+.intro-identity-name-row {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -440,7 +440,7 @@ h3 {
   flex-wrap: wrap;
 }
 
-.intro-identity-row > div:last-child {
+.intro-identity-name-col {
   min-width: 0;
   flex: 1 1 12rem;
 }
@@ -1500,7 +1500,7 @@ h3 {
     gap: 0.85rem;
   }
 
-  .intro-identity-row {
+  .intro-identity-name-row {
     gap: 0.75rem;
   }
 
@@ -1543,7 +1543,7 @@ h3 {
     overflow: visible;
   }
 
-  .intro-identity-row {
+  .intro-identity-name-row {
     flex-wrap: nowrap;
   }
 
@@ -1617,8 +1617,7 @@ h3 {
     padding: 1.1rem;
   }
 
-  .intro-identity-row {
-    align-items: flex-start;
+  .intro-identity-name-row {
     flex-wrap: wrap;
   }
 

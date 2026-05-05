@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate required configuration
         run: |
@@ -40,7 +40,7 @@ jobs:
 
       - name: Set up Node.js
         if: ${{ inputs.deploy_type == 'app' }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -57,7 +57,7 @@ jobs:
         working-directory: site
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -65,11 +65,22 @@ jobs:
       - name: Deploy app (full build output)
         if: ${{ inputs.deploy_type == 'app' }}
         run: |
+          # Static assets (JS, CSS, images) — Vite fingerprints these filenames,
+          # so they are safe to cache for 1 year in browsers.
           aws s3 sync ./site/dist s3://${{ vars.S3_BUCKET_NAME }} --delete \
             --exclude "*.html" \
+            --exclude "data/*" \
             --cache-control "public,max-age=31536000,immutable"
+
+          # HTML files — entry points that reference fingerprinted assets,
+          # must always be fetched fresh to avoid pointing to stale asset URLs.
           aws s3 sync ./site/dist s3://${{ vars.S3_BUCKET_NAME }} --delete \
             --exclude "*" --include "*.html" \
+            --cache-control "public,max-age=0,must-revalidate"
+
+          # Data files (JSON) — content changes independently of the app build,
+          # so no caching to ensure the latest data is always served.
+          aws s3 sync ./site/dist/data s3://${{ vars.S3_BUCKET_NAME }}/data --delete \
             --cache-control "public,max-age=0,must-revalidate"
 
       - name: Deploy data only
