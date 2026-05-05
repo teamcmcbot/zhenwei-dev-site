@@ -216,5 +216,5 @@ terraform apply
 
 After apply, take the outputs and configure the GitHub repository with:
 
-- Secret: `AWS_DEPLOY_ROLE_ARN`
+- Secret: `AWS_ROLE_ARN`
 - Variables: `AWS_REGION`, `S3_BUCKET_NAME`, `CLOUDFRONT_DISTRIBUTION_ID`
