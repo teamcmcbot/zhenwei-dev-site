@@ -40,13 +40,11 @@ export default function Header({ theme, toggleTheme }) {
     <header className="site-header">
       <a href="/" className="brand">zhenwei.dev</a>
       <nav aria-label="Site navigation">
-        <a href="#about">About</a>
         <a href="#skills">Skills</a>
         <a href="#certifications">Certifications</a>
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
-        <a href="#aws-hosting">AWS</a>
-        <a href="#contact">Contact</a>
+        <a href="#aws-hosting">Infrastructure</a>
       </nav>
       <button
         type="button"

@@ -113,16 +113,51 @@ a {
 
 nav {
   display: flex;
-  gap: 0.8rem;
+  gap: 1.2rem;
 }
 
 nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.36rem 0.65rem;
+  border-radius: 999px;
   text-decoration: none;
   color: var(--muted);
+  transition: color 180ms ease, background-color 220ms ease, transform 220ms ease;
+}
+
+nav a::after {
+  content: "";
+  position: absolute;
+  left: 0.65rem;
+  right: 0.65rem;
+  bottom: 0.2rem;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0;
+  transform: scaleX(0.3);
+  transform-origin: center;
+  transition: opacity 220ms ease, transform 220ms ease;
 }
 
 nav a:hover {
   color: var(--text);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  transform: translateY(-1px);
+}
+
+nav a:hover::after,
+nav a:focus-visible::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+nav a:focus-visible {
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
 }
 
 .theme-toggle {
@@ -1565,6 +1600,7 @@ h3 {
     order: 3;
     width: 100%;
     overflow-x: auto;
+    gap: 0.95rem;
     padding-bottom: 0.2rem;
     scrollbar-width: none;
   }

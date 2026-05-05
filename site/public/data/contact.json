@@ -4,17 +4,18 @@
   "links": [
     {
       "label": "Email",
-      "href": "mailto:hello@example.com",
+      "href": "mailto:seozhenwei@gmail.com",
       "type": "email"
     },
     {
       "label": "LinkedIn",
-      "href": "https://www.linkedin.com/in/example",
+      "href": "https://www.linkedin.com/in/seozhenwei",
+
       "type": "social"
     },
     {
       "label": "GitHub",
-      "href": "https://github.com/example",
+      "href": "https://github.com/teamcmcbot",
       "type": "social"
     }
   ]

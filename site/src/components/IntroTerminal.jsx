@@ -55,6 +55,17 @@ function ContactIcon({ type, label }) {
     );
   }
 
+  if (iconKey.includes("credly")) {
+    return (
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path
+          d="M12 2 4 6.5v11L12 22l8-4.5v-11L12 2Zm0 2.3 5.8 3.25v6.9L12 17.7l-5.8-3.25V7.55L12 4.3ZM10.05 14.3l-2.1-2.1 1.06-1.06.9.9 3.08-3.5 1.1.97-4.04 4.59Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
       <path
@@ -88,6 +99,11 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
   const [inputValue, setInputValue] = useState("");
   const [unknownCommand, setUnknownCommand] = useState("");
   const [outputHighlighted, setOutputHighlighted] = useState(false);
+  const resumeAction = intro.identity.resumeAction;
+  const resumeHref = resumeAction?.href || "/assets/resume/zhenwei-seo-resume.pdf";
+  const resumeExternal = isExternalLink(resumeHref);
+  const resumeDownload = resumeAction?.download !== false && !resumeExternal;
+  const resumeFileName = resumeAction?.fileName;
   const outputRef = useRef(null);
   const inputRef = useRef(null);
   const attentionTimeoutRef = useRef(null);
@@ -465,12 +481,15 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
           </div>
           <p className="intro-summary">{intro.identity.summary}</p>
           <div className="intro-actions">
-            <a className="btn btn-primary" href={intro.identity.primaryAction?.href || "#projects"}>
-              {intro.identity.primaryAction?.label || "View Projects"}
+            <a
+              className="btn btn-primary"
+              href={resumeHref}
+              download={resumeDownload ? resumeFileName || true : undefined}
+              target={resumeExternal ? "_blank" : undefined}
+              rel={resumeExternal ? "noopener noreferrer" : undefined}
+            >
+              {resumeAction?.label || "Download Resume"}
             </a>
-            <button type="button" className="btn btn-secondary" onClick={() => runCommand("contact")}>
-              {intro.identity.secondaryAction?.label || "Contact"}
-            </button>
           </div>
           <div className="intro-profile-contact" aria-label="Contact links">
             <p className="panel-label">Contact</p>
@@ -626,13 +645,11 @@ IntroTerminal.propTypes = {
       summary: PropTypes.string,
       location: PropTypes.string,
       imageUrl: PropTypes.string,
-      primaryAction: PropTypes.shape({
+      resumeAction: PropTypes.shape({
         href: PropTypes.string,
-        label: PropTypes.string
-      }),
-      secondaryAction: PropTypes.shape({
-        href: PropTypes.string,
-        label: PropTypes.string
+        label: PropTypes.string,
+        download: PropTypes.bool,
+        fileName: PropTypes.string
       })
     }).isRequired,
     terminal: PropTypes.shape({

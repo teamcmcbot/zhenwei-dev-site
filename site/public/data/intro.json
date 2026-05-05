@@ -4,16 +4,18 @@
     "domain": "zhenwei.dev",
     "role": "DevOps / Cloud Engineer",
     "headline": "Zhenwei SEO",
-    "summary": "DevOps-focused engineer with 17+ years of backend experience, building automated CI/CD pipelines, Terraform-managed infrastructure, and cloud-native systems on AWS.",
+    "summary": "DevOps-focused engineer with 17+ years in backend development, experienced in building scalable systems and modernizing legacy applications. I am transitioning into cloud and DevOps by working with AWS, Docker, Terraform, and CI/CD practices to improve automation, deployment workflows, and platform reliability.",
     "location": "Singapore",
     "imageUrl": "/assets/profile/profile-silhouette.png",
-    "primaryAction": {
-      "label": "Run projects",
-      "href": "#projects"
+    "resumeAction": {
+      "label": "Download Resume",
+      "href": "/assets/resume/zhenwei-seo-resume.pdf",
+      "download": true,
+      "fileName": "zhenwei-seo-resume.pdf"
     },
     "secondaryAction": {
-      "label": "Open contact",
-      "href": "#contact"
+      "label": "Site Infrastructure",
+      "href": "#aws-hosting"
     }
   },
   "terminal": {
@@ -24,57 +26,30 @@
       "Type a command or use the command deck to inspect profile, contact, and work signals."
     ],
     "commands": [
-      {
-        "name": "help",
-        "label": "help",
-        "description": "List available commands"
-      },
-      {
-        "name": "about",
-        "label": "about",
-        "description": "Read the short profile"
-      },
-      {
-        "name": "skills",
-        "label": "skills",
-        "description": "Preview skill groups"
-      },
-      {
-        "name": "certs",
-        "label": "certs",
-        "description": "View certifications and credentials"
-      },
-      {
-        "name": "experience",
-        "label": "experience",
-        "description": "Preview experience highlights"
-      },
-      {
-        "name": "projects",
-        "label": "projects",
-        "description": "Preview project evidence"
-      },
-      {
-        "name": "clear",
-        "label": "clear",
-        "description": "Reset the terminal output"
-      }
+      { "name": "help", "label": "help", "description": "List available commands" },
+      { "name": "about", "label": "about", "description": "Read the short profile" },
+      { "name": "skills", "label": "skills", "description": "Preview skill groups" },
+      { "name": "certs", "label": "certs", "description": "View certifications and credentials" },
+      { "name": "experience", "label": "experience", "description": "Preview experience highlights" },
+      { "name": "projects", "label": "projects", "description": "Preview project evidence" },
+      { "name": "clear", "label": "clear", "description": "Reset the terminal output" }
     ]
   },
   "about": {
     "title": "About",
     "kicker": "Backend depth, DevOps focus, cloud delivery.",
     "paragraphs": [
-      "I'm a software engineer with 17+ years of experience in backend development, specializing in building reliable APIs and scalable systems using Java and Spring-based technologies.",
-      "Over time, I've expanded into DevOps and Cloud Engineering, working hands-on with AWS, Docker, Kubernetes, and CI/CD pipelines. My focus is on automating infrastructure, improving deployment workflows, and building production-ready cloud platforms.",
-      "This portfolio is designed as a practical DevOps showcase, demonstrating how I apply Infrastructure as Code, secure CI/CD pipelines, and cloud-native architecture to deliver real-world systems."
+      "I’m a software engineer with 17+ years of experience in backend development, specializing in building reliable APIs and scalable systems using Java and Spring-based technologies.",
+      "In recent years, I’ve been expanding into DevOps and Cloud Engineering, working hands-on with AWS, Docker, Kubernetes, and Infrastructure as Code. My focus is on improving automation, deployment workflows, and building reliable, production-ready cloud systems.",
+      "I hold certifications including AWS Certified Solutions Architect Associate, AWS Certified Developer Associate, Certified Kubernetes Administrator (CKA), and HashiCorp Certified: Terraform Associate, reflecting my commitment to developing practical skills in cloud and infrastructure technologies.",
+      "I have a strong interest in AWS cloud architecture and enjoy exploring how services integrate to build scalable, resilient, and cost-efficient systems.",
+      "This portfolio is built as a practical DevOps showcase, demonstrating how I apply Terraform-managed infrastructure, CI/CD practices, and cloud-native architecture in real-world projects."
     ],
     "focusAreas": [
-      "Infrastructure as Code",
-      "Secure CI/CD",
-      "AWS Architecture",
-      "Edge Delivery",
-      "Platform Automation"
+      "Infrastructure as Code (Terraform)",
+      "CI/CD Practices (GitHub Actions, OIDC)",
+      "AWS Cloud Architecture",
+      "Kubernetes and Container Orchestration"
     ]
   },
   "contact": {
@@ -83,17 +58,17 @@
     "links": [
       {
         "label": "Email",
-        "href": "mailto:hello@example.com",
+        "href": "mailto:seozhenwei@gmail.com",
         "type": "email"
       },
       {
-        "label": "LinkedIn",
-        "href": "https://www.linkedin.com/in/example",
+        "label": "Credly",
+        "href": "https://www.credly.com/users/zhenwei-seo/badges#credly",
         "type": "social"
       },
       {
         "label": "GitHub",
-        "href": "https://github.com/example",
+        "href": "https://github.com/teamcmcbot",
         "type": "social"
       }
     ]
