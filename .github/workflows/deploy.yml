@@ -29,8 +29,8 @@ jobs:
 
       - name: Validate required configuration
         run: |
-          if [ -z "${{ secrets.AWS_DEPLOY_ROLE_ARN }}" ]; then
-            echo "Missing secret: AWS_DEPLOY_ROLE_ARN"
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ]; then
+            echo "Missing secret: AWS_ROLE_ARN"
             exit 1
           fi
           if [ -z "${{ vars.S3_BUCKET_NAME }}" ]; then
@@ -59,7 +59,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy app (full build output)

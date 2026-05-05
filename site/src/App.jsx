@@ -45,7 +45,7 @@ export default function App() {
   return (
     <div className="app-shell" id="top">
       <a href="#main-content" className="skip-link">Skip to content</a>
-      <Header theme={theme} toggleTheme={toggleTheme} />
+      <Header theme={theme} toggleTheme={toggleTheme} brand={state.data?.intro?.identity?.domain} />
       <main id="main-content" className="page-content">
         {state.loading && <p className="status">Loading content...</p>}
         {state.error && (
@@ -72,7 +72,7 @@ export default function App() {
           </>
         )}
       </main>
-      <Footer />
+      <Footer name={state.data?.intro?.identity?.name} />
     </div>
   );
 }

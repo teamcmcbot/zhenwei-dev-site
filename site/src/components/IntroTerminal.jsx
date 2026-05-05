@@ -100,7 +100,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
   const [unknownCommand, setUnknownCommand] = useState("");
   const [outputHighlighted, setOutputHighlighted] = useState(false);
   const resumeAction = intro.identity.resumeAction;
-  const resumeHref = resumeAction?.href || "/assets/resume/zhenwei-seo-resume.pdf";
+  const resumeHref = resumeAction?.href || "";
   const resumeExternal = isExternalLink(resumeHref);
   const resumeDownload = resumeAction?.download !== false && !resumeExternal;
   const resumeFileName = resumeAction?.fileName;

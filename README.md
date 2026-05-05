@@ -52,7 +52,7 @@ After running `terraform apply`, configure the following in GitHub repo **Settin
 
 | Name | Value |
 |---|---|
-| `AWS_DEPLOY_ROLE_ARN` | IAM role ARN from `terraform output github_deploy_role_arn` |
+| `AWS_ROLE_ARN` | IAM role ARN from `terraform output github_deploy_role_arn` |
 
 **Variables** (non-sensitive, visible in logs):
 
@@ -86,7 +86,7 @@ terraform apply
 In GitHub repo settings:
 
 1. Add secret:
-- AWS_DEPLOY_ROLE_ARN = output github_deploy_role_arn
+- AWS_ROLE_ARN = output github_deploy_role_arn
 
 2. Add variables:
 - AWS_REGION = same as terraform aws_region

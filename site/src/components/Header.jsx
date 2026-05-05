@@ -33,18 +33,18 @@ ThemeIcon.propTypes = {
   theme: PropTypes.oneOf(["dark", "light"]).isRequired
 };
 
-export default function Header({ theme, toggleTheme }) {
+export default function Header({ theme, toggleTheme, brand }) {
   const nextTheme = theme === "dark" ? "light" : "dark";
 
   return (
     <header className="site-header">
-      <a href="/" className="brand">zhenwei.dev</a>
+      <a href="/" className="brand">{brand}</a>
       <nav aria-label="Site navigation">
         <a href="#skills">Skills</a>
         <a href="#certifications">Certifications</a>
         <a href="#experience">Experience</a>
         <a href="#projects">Projects</a>
-        <a href="#aws-hosting">Infrastructure</a>
+        <a href="#aws-hosting">Architecture</a>
       </nav>
       <button
         type="button"
@@ -61,5 +61,6 @@ export default function Header({ theme, toggleTheme }) {
 
 Header.propTypes = {
   theme: PropTypes.oneOf(["dark", "light"]).isRequired,
-  toggleTheme: PropTypes.func.isRequired
+  toggleTheme: PropTypes.func.isRequired,
+  brand: PropTypes.string
 };
