@@ -59,8 +59,8 @@ policy conflicts and keeps concerns separated.
 The PDF is uploaded **manually** via AWS CLI or Console — it is never committed to git.
 
 ```bash
-aws s3 cp zhenwei-seo-resume.pdf \
-  s3://<bucket-name>/zhenwei-seo-resume.pdf \
+aws s3 cp zhenwei-seo-cv.pdf \
+  s3://<bucket-name>/zhenwei-seo-cv.pdf \
   --region ap-southeast-1
 ```
 
@@ -80,7 +80,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 BUCKET   = os.environ["RESUME_BUCKET"]
-KEY      = os.environ["RESUME_KEY"]       # e.g. "zhenwei-seo-resume.pdf"
+KEY      = os.environ["RESUME_KEY"]       # e.g. "zhenwei-seo-cv.pdf"
 FILENAME = os.environ["RESUME_FILENAME"]  # Content-Disposition filename
 TTL      = int(os.environ.get("URL_TTL_SECONDS", "300"))
 
@@ -126,8 +126,8 @@ def handler(event, context):
 | Variable | Example value |
 |---|---|
 | `RESUME_BUCKET` | `zhenwei-dev-resume` |
-| `RESUME_KEY` | `zhenwei-seo-resume.pdf` |
-| `RESUME_FILENAME` | `zhenwei-seo-resume.pdf` |
+| `RESUME_KEY` | `zhenwei-seo-cv.pdf` |
+| `RESUME_FILENAME` | `zhenwei-seo-cv.pdf` |
 | `URL_TTL_SECONDS` | `300` |
 | `ALLOWED_ORIGINS` | `https://zhenwei.dev,https://www.zhenwei.dev` |
 
@@ -258,7 +258,7 @@ raw `execute-api` hostname in the source code.
 2. Add `terraform/resume_api.tf` with all resources.
 3. Extend the GitHub OIDC deploy role policy in `terraform/iam.tf`.
 4. `terraform plan` → review → `terraform apply`.
-5. Upload PDF: `aws s3 cp ... s3://<resume-bucket>/zhenwei-seo-resume.pdf`.
+5. Upload PDF: `aws s3 cp ... s3://<resume-bucket>/zhenwei-seo-cv.pdf`.
 6. Copy `resume_api_url` output → update `intro.json` `resumeAction.href`.
 7. `npm run build` → push → CI deploys site.
 8. Verify end-to-end: button → API → 302 → PDF download.
@@ -293,14 +293,14 @@ visitor@zhenwei.dev:~$ resume
 > Requesting presigned URL from S3...
 > Connecting to api.zhenwei.dev...
 
---2026-05-05 12:00:01--  https://zhenwei-dev-resume.s3.ap-southeast-1.amazonaws.com/zhenwei-seo-resume.pdf
+--2026-05-05 12:00:01--  https://zhenwei-dev-resume.s3.ap-southeast-1.amazonaws.com/zhenwei-seo-cv.pdf
 Resolving zhenwei-dev-resume.s3.ap-southeast-1.amazonaws.com... 52.xx.xx.xx
 Connecting to zhenwei-dev-resume.s3... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: 182341 (178K) [application/pdf]
-Saving to: 'zhenwei-seo-resume.pdf'
+Saving to: 'zhenwei-seo-cv.pdf'
 
-zhenwei-seo-resume.pdf    100%[===================>] 178K  --.-KB/s    in 0.3s
+zhenwei-seo-cv.pdf    100%[===================>] 178K  --.-KB/s    in 0.3s
 
 > Download complete. Check your downloads folder.
 ```
@@ -377,14 +377,14 @@ function renderResumeOutput() {
 
       {(resumeState === "downloading" || resumeState === "done") && (
         <pre className="terminal-wget-block">
-{`--${timestamp}--  https://...s3.amazonaws.com/zhenwei-seo-resume.pdf
+{`--${timestamp}--  https://...s3.amazonaws.com/zhenwei-seo-cv.pdf
 Resolving ...s3.amazonaws.com... resolved.
 Connecting... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: ~180K [application/pdf]
-Saving to: 'zhenwei-seo-resume.pdf'
+Saving to: 'zhenwei-seo-cv.pdf'
 
-zhenwei-seo-resume.pdf    100%[===================>] 178K  in 0.3s`}
+zhenwei-seo-cv.pdf    100%[===================>] 178K  in 0.3s`}
         </pre>
       )}
 
@@ -475,8 +475,8 @@ to 100%.
 
 ## v1 Status
 
-Current v1 ships with a **static path** pointing to `/assets/resume/zhenwei-seo-resume.pdf`.
-Place the actual PDF at `site/public/assets/resume/zhenwei-seo-resume.pdf` before
+Current v1 ships with a **static path** pointing to `/assets/resume/zhenwei-seo-cv.pdf`.
+Place the actual PDF at `site/public/assets/resume/zhenwei-seo-cv.pdf` before
 publishing — it will be served directly from CloudFront.
 
 The presigned URL approach is a v2 enhancement. v1 is fully functional without it.

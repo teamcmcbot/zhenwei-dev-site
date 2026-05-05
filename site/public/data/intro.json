@@ -9,9 +9,9 @@
     "imageUrl": "/assets/profile/profile-silhouette.png",
     "resumeAction": {
       "label": "Download CV",
-      "href": "/assets/resume/zhenwei-seo-resume.pdf",
+      "href": "/assets/resume/zhenwei-seo-cv.pdf",
       "download": true,
-      "fileName": "zhenwei-seo-resume.pdf"
+      "fileName": "zhenwei-seo-cv.pdf"
     },
     "secondaryAction": {
       "label": "Site Infrastructure",
