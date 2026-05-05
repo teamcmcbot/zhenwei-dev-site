@@ -160,8 +160,27 @@ nav a:focus-visible {
   background: color-mix(in srgb, var(--surface-2) 82%, transparent);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .theme-toggle {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.menu-toggle {
+  display: none;
   align-items: center;
   justify-content: center;
   width: 2.2rem;
@@ -1000,45 +1019,34 @@ h3 {
   margin-top: 1rem;
 }
 
-.skills-heading {
+.section-heading {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  margin-bottom: 0.25rem;
 }
 
-.skills-heading h2 {
-  margin-top: 0.25rem;
-}
-
-.skills-summary {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, auto));
-  gap: 0.5rem;
-  margin: 0;
-}
-
-.skills-summary div {
-  min-width: 5.5rem;
+.scroll-top-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.55rem 0.65rem;
-  background: color-mix(in srgb, var(--terminal-panel-2) 82%, transparent);
-}
-
-.skills-summary dt {
+  border-radius: 999px;
+  background: var(--surface);
   color: var(--muted);
-  font-size: 0.74rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
 }
 
-.skills-summary dd {
-  margin: 0.18rem 0 0;
+.scroll-top-btn:hover {
   color: var(--text);
-  font-size: 1.25rem;
-  font-weight: 800;
+  background: var(--surface-2);
+  transform: translateY(-2px);
 }
+
 
 .skills-control-panel {
   display: grid;
@@ -1594,23 +1602,32 @@ h3 {
     padding: 0.8rem;
     flex-wrap: wrap;
     gap: 0.5rem;
+    align-items: center;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
   }
 
   nav {
+    display: none;
     order: 3;
     width: 100%;
-    overflow-x: auto;
-    gap: 0.95rem;
-    padding-bottom: 0.2rem;
-    scrollbar-width: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--line);
   }
 
-  nav::-webkit-scrollbar {
-    display: none;
+  nav.nav-open {
+    display: flex;
   }
 
   nav a {
-    white-space: nowrap;
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
   }
 
   .card {
@@ -1673,21 +1690,8 @@ h3 {
     grid-template-columns: 1fr;
   }
 
-  .skills-heading,
   .skills-control-panel {
     grid-template-columns: 1fr;
-  }
-
-  .skills-heading {
-    flex-direction: column;
-  }
-
-  .skills-summary {
-    width: 100%;
-  }
-
-  .skills-summary div {
-    min-width: 0;
   }
 
   .skills-grid,
@@ -1726,10 +1730,6 @@ h3 {
 }
 
 @media (max-width: 480px) {
-  .skills-summary {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .core-skills span,
   .chips li {
     font-size: 0.84rem;

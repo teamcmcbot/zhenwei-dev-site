@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import ScrollToTopButton from "./ScrollToTopButton";
 
 function isCredentialUrl(url) {
   if (!url || url.trim() === "" || url.trim() === "#") {
@@ -16,7 +17,10 @@ function isCredentialUrl(url) {
 export default function Certifications({ certifications }) {
   return (
     <section id="certifications" className="card" aria-labelledby="certifications-title">
-      <h2 id="certifications-title">Certifications</h2>
+      <div className="section-heading">
+        <h2 id="certifications-title">Certifications</h2>
+        <ScrollToTopButton />
+      </div>
       <div className="cert-grid">
         {certifications.map((certification) => {
           const hasCredentialLink = isCredentialUrl(certification.credentialUrl);

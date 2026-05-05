@@ -1,9 +1,13 @@
 import PropTypes from "prop-types";
+import ScrollToTopButton from "./ScrollToTopButton";
 
 export default function Experience({ experiences }) {
   return (
     <section id="experience" className="card" aria-labelledby="experience-title">
-      <h2 id="experience-title">Experience</h2>
+      <div className="section-heading">
+        <h2 id="experience-title">Experience</h2>
+        <ScrollToTopButton />
+      </div>
       <div className="timeline">
         {experiences.map((item) => (
           <article key={`${item.company}-${item.period}`} className="timeline-item">

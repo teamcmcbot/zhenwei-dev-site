@@ -236,7 +236,7 @@ After the API is deployed, update `site/public/data/intro.json`:
 
 ```json
 "resumeAction": {
-  "label": "Download Resume",
+  "label": "Download CV",
   "href": "https://api.zhenwei.dev/resume/download",
   "download": false
 }
@@ -334,7 +334,7 @@ command deck:
 {
   "name": "resume",
   "label": "resume",
-  "description": "Download resume (PDF)"
+  "description": "Download CV (PDF)"
 }
 ```
 

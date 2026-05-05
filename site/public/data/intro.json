@@ -8,7 +8,7 @@
     "location": "Singapore",
     "imageUrl": "/assets/profile/profile-silhouette.png",
     "resumeAction": {
-      "label": "Download Resume",
+      "label": "Download CV",
       "href": "/assets/resume/zhenwei-seo-resume.pdf",
       "download": true,
       "fileName": "zhenwei-seo-resume.pdf"

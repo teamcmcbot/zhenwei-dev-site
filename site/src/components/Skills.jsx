@@ -1,17 +1,13 @@
 import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import { groupMatchesQuery, normalizeSkills, skillMatchesQuery } from "../lib/skills";
+import ScrollToTopButton from "./ScrollToTopButton";
 
 export default function Skills({ skills }) {
   const [query, setQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState({});
   const normalizedQuery = query.trim().toLowerCase();
   const normalizedSkills = useMemo(() => normalizeSkills(skills), [skills]);
-
-  const totalSkills = useMemo(
-    () => normalizedSkills.reduce((total, group) => total + group.items.length, 0),
-    [normalizedSkills]
-  );
 
   const coreSkills = useMemo(
     () => normalizedSkills.flatMap((group) => group.items).filter((item) => item.core),
@@ -47,21 +43,12 @@ export default function Skills({ skills }) {
 
   return (
     <section id="skills" className="card" aria-labelledby="skills-title">
-      <div className="skills-heading">
+      <div className="section-heading">
         <div>
           <p className="eyebrow">Capability Map</p>
           <h2 id="skills-title">Skills</h2>
         </div>
-        <dl className="skills-summary" aria-label="Skills summary">
-          <div>
-            <dt>Domains</dt>
-            <dd>{normalizedSkills.length}</dd>
-          </div>
-          <div>
-            <dt>Skills</dt>
-            <dd>{totalSkills}</dd>
-          </div>
-        </dl>
+        <ScrollToTopButton />
       </div>
 
       <div className="skills-control-panel">

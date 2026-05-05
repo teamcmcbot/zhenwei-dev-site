@@ -488,11 +488,11 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
               target={resumeExternal ? "_blank" : undefined}
               rel={resumeExternal ? "noopener noreferrer" : undefined}
             >
-              {resumeAction?.label || "Download Resume"}
+              {resumeAction?.label || "Download CV"}
             </a>
           </div>
           <div className="intro-profile-contact" aria-label="Contact links">
-            <p className="panel-label">Contact</p>
+            <p className="panel-label">Contact & Links</p>
             <div className="intro-profile-contact-list">
               {(intro.contact.links || []).map((link) => {
                 const external = isExternalLink(link.href);

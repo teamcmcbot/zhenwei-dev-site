@@ -1,9 +1,13 @@
 import PropTypes from "prop-types";
+import ScrollToTopButton from "./ScrollToTopButton";
 
 export default function AwsStaticHosting({ data }) {
   return (
     <section id="aws-hosting" className="card" aria-labelledby="aws-hosting-title">
-      <h2 id="aws-hosting-title">{data.title}</h2>
+      <div className="section-heading">
+        <h2 id="aws-hosting-title">{data.title}</h2>
+        <ScrollToTopButton />
+      </div>
       <p className="meta body-text">{data.summary}</p>
 
       <div className="aws-grid">

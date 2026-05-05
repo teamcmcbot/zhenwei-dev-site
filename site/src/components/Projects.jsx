@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import ScrollToTopButton from "./ScrollToTopButton";
 
 function hasExternalLink(url) {
   if (!url || url.trim() === "" || url.trim() === "#") {
@@ -16,7 +17,10 @@ function hasExternalLink(url) {
 export default function Projects({ projects }) {
   return (
     <section id="projects" className="card" aria-labelledby="projects-title">
-      <h2 id="projects-title">Projects</h2>
+      <div className="section-heading">
+        <h2 id="projects-title">Projects</h2>
+        <ScrollToTopButton />
+      </div>
       <div className="project-grid">
         {projects.map((project) => (
           <article key={project.slug} className="project-card">
