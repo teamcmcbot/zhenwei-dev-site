@@ -30,6 +30,10 @@ function getPreviewItems(items = [], limit = 3) {
   };
 }
 
+function getDisplayHref(href = "") {
+  return href.startsWith("mailto:") ? href.slice("mailto:".length) : href;
+}
+
 function ContactIcon({ type, label }) {
   const iconKey = `${type || ""} ${label || ""}`.toLowerCase();
 
@@ -94,11 +98,12 @@ function scrollToSection(sectionId) {
   globalThis.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
 }
 
-export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills, certifications, experiences, projects }) {
+export default function IntroTerminal({ intro, theme, easterEggUnlocked, onHide, onUnhide, skills, certifications, experiences, projects }) {
   const [activeCommand, setActiveCommand] = useState("welcome");
   const [inputValue, setInputValue] = useState("");
   const [unknownCommand, setUnknownCommand] = useState("");
   const [outputHighlighted, setOutputHighlighted] = useState(false);
+  const [copiedKey, setCopiedKey] = useState("");
   const resumeAction = intro.identity.resumeAction;
   const resumeHref = resumeAction?.href || "";
   const resumeExternal = isExternalLink(resumeHref);
@@ -115,13 +120,25 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
   );
 
   const displayImageUrl =
-    easterEggUnlocked && theme === "light"
+    easterEggUnlocked
       ? intro.identity.imageUrl?.replace("-silhouette", "")
       : intro.identity.imageUrl;
 
   useEffect(() => () => {
     globalThis.clearTimeout(attentionTimeoutRef.current);
   }, []);
+
+  async function copyToClipboard(text, key) {
+    try {
+      await globalThis.navigator?.clipboard?.writeText(text);
+      setCopiedKey(key);
+      globalThis.setTimeout(() => {
+        setCopiedKey((current) => (current === key ? "" : current));
+      }, 1200);
+    } catch {
+      setCopiedKey("");
+    }
+  }
 
   function refocusTerminalInput() {
     globalThis.clearTimeout(attentionTimeoutRef.current);
@@ -158,6 +175,37 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
       return;
     }
 
+    if (canonical === "hide") {
+      setUnknownCommand("");
+      setActiveCommand("hide");
+      onHide?.();
+      refocusTerminalInput();
+      return;
+    }
+
+    if (canonical === "unhide") {
+      setUnknownCommand("");
+      setActiveCommand("unhide");
+      onUnhide?.();
+      refocusTerminalInput();
+      return;
+    }
+
+    if (canonical === "email" || canonical === "credly" || canonical === "github" || canonical === "linkedin") {
+      setUnknownCommand("");
+      setActiveCommand(canonical);
+      refocusTerminalInput();
+      return;
+    }
+
+    if (canonical === "infra" || canonical === "architecture") {
+      setUnknownCommand("");
+      setActiveCommand("infra");
+      scrollToSection("aws-hosting");
+      refocusTerminalInput();
+      return;
+    }
+
     if (!commandMap.has(canonical)) {
       setUnknownCommand(normalized);
       setActiveCommand("unknown");
@@ -182,7 +230,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
         {(intro.terminal?.welcomeLines || []).map((line) => (
           <p key={line} className="terminal-line terminal-line--success">{line}</p>
         ))}
-        <p className="terminal-line">Run <span>help</span> to list commands, or inspect the panels below.</p>
+        <p className="terminal-line">Run <span>help</span> to list commands, or inspect the panels to the right.</p>
       </div>
     );
   }
@@ -230,17 +278,24 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
         <p className="terminal-line terminal-line--accent">{intro.contact.message}</p>
         <div className="intro-contact-actions">
           {(intro.contact.links || []).map((link) => {
-            const external = isExternalLink(link.href);
+            const displayHref = getDisplayHref(link.href);
+            const copyKey = `contact-${link.label.toLowerCase()}`;
 
             return (
-              <a
-                key={`${link.type}-${link.label}`}
-                href={link.href}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noopener noreferrer" : undefined}
-              >
-                {link.label}
-              </a>
+              <div key={`${link.type}-${link.label}`} className="terminal-contact-row">
+                <p className="terminal-line">
+                  <span className="terminal-line--success">{link.label}:</span> {displayHref}
+                </p>
+                <button
+                  type="button"
+                  className="terminal-copy-button"
+                  onClick={() => copyToClipboard(displayHref, copyKey)}
+                  aria-label={`Copy ${link.label}`}
+                  title="Copy"
+                >
+                  {copiedKey === copyKey ? "Copied" : "Copy"}
+                </button>
+              </div>
             );
           })}
         </div>
@@ -285,7 +340,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
 
     return (
       <div className="terminal-output-block terminal-output-block--content">
-        <p className="terminal-line terminal-line--success">Skills index: {normalizedSkills.length} groups / {totalSkills} signals</p>
+        <p className="terminal-line terminal-line--success">Skills index: {normalizedSkills.length} groups / {totalSkills} skills</p>
         <div className="terminal-record-list">
           {normalizedSkills.map((group) => (
             <article key={group.group} className="terminal-record terminal-record--compact">
@@ -422,6 +477,69 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
     );
   }
 
+  function findContactLink(label) {
+    return (intro.contact.links || []).find(
+      (link) => link.label?.toLowerCase() === label.toLowerCase()
+    );
+  }
+
+  function renderContactLinkOutput(label) {
+    const link = findContactLink(label);
+
+    if (!link) {
+      return (
+        <div className="terminal-output-block">
+          <p className="terminal-line terminal-line--error">{label.charAt(0).toUpperCase() + label.slice(1)} URL not found.</p>
+        </div>
+      );
+    }
+
+    const displayHref = getDisplayHref(link.href);
+    const copyKey = `single-${label.toLowerCase()}`;
+
+    return (
+      <div className="terminal-output-block">
+        <p className="terminal-line terminal-line--success">{link.label}</p>
+        <div className="terminal-contact-row">
+          <p className="terminal-line">{displayHref}</p>
+          <button
+            type="button"
+            className="terminal-copy-button"
+            onClick={() => copyToClipboard(displayHref, copyKey)}
+            aria-label={`Copy ${link.label}`}
+            title="Copy"
+          >
+            {copiedKey === copyKey ? "Copied" : "Copy"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderInfraOutput() {
+    return (
+      <div className="terminal-output-block">
+        <p className="terminal-line terminal-line--success">Navigating to site infrastructure section...</p>
+      </div>
+    );
+  }
+
+  function renderHideOutput() {
+    return (
+      <div className="terminal-output-block">
+        <p className="terminal-line terminal-line--success">Profile hidden. Identity concealed.</p>
+      </div>
+    );
+  }
+
+  function renderUnhideOutput() {
+    return (
+      <div className="terminal-output-block">
+        <p className="terminal-line terminal-line--success">Identity revealed.</p>
+      </div>
+    );
+  }
+
   function renderUnknownOutput() {
     return (
       <div className="terminal-output-block">
@@ -447,6 +565,20 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
         return renderExperienceOutput();
       case "projects":
         return renderProjectsOutput();
+      case "hide":
+        return renderHideOutput();
+      case "unhide":
+        return renderUnhideOutput();
+      case "email":
+        return renderContactLinkOutput("email");
+      case "credly":
+        return renderContactLinkOutput("credly");
+      case "github":
+        return renderContactLinkOutput("github");
+      case "linkedin":
+        return renderContactLinkOutput("linkedin");
+      case "infra":
+        return renderInfraOutput();
       case "unknown":
         return renderUnknownOutput();
       default:
@@ -468,7 +600,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
             {displayImageUrl && (
               <div className="intro-avatar-frame">
                 <img
-                  className={`intro-avatar${easterEggUnlocked && theme === "light" ? " intro-avatar--revealed" : ""}`}
+                  className={`intro-avatar${easterEggUnlocked ? " intro-avatar--revealed" : ""}`}
                   src={displayImageUrl}
                   alt={intro.identity.name ? `${intro.identity.name} profile photo` : "Profile photo"}
                 />
@@ -574,6 +706,8 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
 IntroTerminal.propTypes = {
   theme: PropTypes.oneOf(["dark", "light"]),
   easterEggUnlocked: PropTypes.bool,
+  onHide: PropTypes.func,
+  onUnhide: PropTypes.func,
   skills: PropTypes.arrayOf(
     PropTypes.shape({
       group: PropTypes.string.isRequired,

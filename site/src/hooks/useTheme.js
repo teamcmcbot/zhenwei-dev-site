@@ -31,5 +31,5 @@ export function useTheme() {
 
   const easterEggUnlocked = lightToggleCount >= 3;
 
-  return { theme, toggleTheme, easterEggUnlocked };
+  return { theme, toggleTheme, easterEggUnlocked, setLightToggleCount };
 }

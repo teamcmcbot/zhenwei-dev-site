@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 
 export default function Hero({ profile, theme, easterEggUnlocked }) {
   const displayImageUrl =
-    easterEggUnlocked && theme === "light"
+    easterEggUnlocked
       ? profile.imageUrl?.replace("-silhouette", "")
       : profile.imageUrl;
 
@@ -25,7 +25,7 @@ export default function Hero({ profile, theme, easterEggUnlocked }) {
         {displayImageUrl && (
           <div className="hero-image-wrap">
             <img
-              className={`hero-avatar${easterEggUnlocked && theme === "light" ? " hero-avatar--revealed" : ""}`}
+              className={`hero-avatar${easterEggUnlocked ? " hero-avatar--revealed" : ""}`}
               src={displayImageUrl}
               alt={profile.name ? `${profile.name} profile photo` : "Profile photo"}
             />

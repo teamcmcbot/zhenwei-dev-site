@@ -966,24 +966,34 @@ h3 {
 }
 
 .intro-contact-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 0.5rem;
 }
 
-.intro-contact-actions a {
-  min-height: 2.1rem;
-  display: inline-flex;
+.terminal-contact-row {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0 0.7rem;
-  color: var(--text);
-  text-decoration: none;
+  padding: 0.45rem 0.65rem;
   background: color-mix(in srgb, var(--terminal-panel-2) 74%, transparent);
 }
 
-.intro-contact-actions a:hover {
+.terminal-copy-button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--terminal-panel-2) 88%, transparent);
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  cursor: pointer;
+}
+
+.terminal-copy-button:hover,
+.terminal-copy-button:focus-visible {
   border-color: var(--terminal-green);
   color: var(--terminal-green);
 }

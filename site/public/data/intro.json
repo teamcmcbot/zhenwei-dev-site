@@ -23,7 +23,7 @@
     "prompt": "visitor@zhenwei.dev:~$",
     "welcomeLines": [
       "Portfolio console initialized.",
-      "Type a command or use the command deck to inspect profile, contact, and work signals."
+      "Type a command or use the command deck to inspect profile, contact, and work skills."
     ],
     "commands": [
       { "name": "help", "label": "help", "description": "List available commands" },

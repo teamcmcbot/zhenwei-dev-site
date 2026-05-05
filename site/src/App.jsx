@@ -11,7 +11,7 @@ import { useTheme } from "./hooks/useTheme";
 import { loadHomeData } from "./lib/data";
 
 export default function App() {
-  const { theme, toggleTheme, easterEggUnlocked } = useTheme();
+  const { theme, toggleTheme, easterEggUnlocked, setLightToggleCount } = useTheme();
   const [state, setState] = useState({
     loading: true,
     error: "",
@@ -59,6 +59,8 @@ export default function App() {
               intro={state.data.intro}
               theme={theme}
               easterEggUnlocked={easterEggUnlocked}
+              onHide={() => setLightToggleCount(0)}
+              onUnhide={() => setLightToggleCount((c) => Math.max(c, 3))}
               skills={state.data.skills}
               certifications={state.data.certifications}
               experiences={state.data.experiences}
