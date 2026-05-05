@@ -1,28 +1,81 @@
 [
   {
-    "company": "Example Cloud Platform Team",
-    "role": "DevOps Engineer",
-    "location": "Remote",
-    "period": "2024 - Present",
-    "summary": "Supported cloud infrastructure, deployment automation, and operational reliability for internal engineering teams.",
+    "company": "Banking Modernisation POC",
+    "role": "Lead Developer",
+    "location": "Singapore",
+    "period": "2025 May - Oct",
+    "summary": "Led modernization of legacy banking systems into containerized microservices with improved maintainability and deployment workflows.",
     "highlights": [
-      "Built Terraform workflows for repeatable AWS infrastructure provisioning.",
-      "Implemented GitHub Actions deployment pipelines using OIDC instead of long-lived AWS keys.",
-      "Improved deployment confidence with automated validation and rollback-oriented release practices."
+      "Migrated legacy monolithic applications to Java 17 Spring Boot microservices.",
+      "Designed and implemented secure RESTful APIs for backend integration and user management.",
+      "Containerized backend, frontend, and Oracle DB using Docker Compose for consistent deployments.",
+      "Replaced legacy ORM framework with Hibernate JPA, improving maintainability and performance."
     ],
-    "technologies": ["AWS", "Terraform", "GitHub Actions", "CloudFront", "S3", "IAM"]
+    "technologies": ["Java", "Spring Boot", "Docker", "Docker Compose", "Hibernate", "Oracle DB", "REST APIs"]
   },
   {
-    "company": "Example Infrastructure Operations",
-    "role": "Platform Support Engineer",
-    "location": "Your City",
-    "period": "2022 - 2024",
-    "summary": "Worked on Linux systems, automation scripts, monitoring, and service reliability improvements.",
+    "company": "Instant Feedback System (Airport Platform)",
+    "role": "AWS Backend API Developer",
+    "location": "Singapore",
+    "period": "2025 Jan - Apr",
+    "summary": "Developed serverless backend services for a real-time feedback and staff monitoring platform using AWS cloud-native architecture.",
     "highlights": [
-      "Automated recurring operational tasks with shell scripts.",
-      "Helped standardize deployment checklists and environment configuration.",
-      "Investigated production issues using logs, metrics, and infrastructure state."
+      "Designed and implemented serverless architecture using API Gateway, Lambda, DynamoDB, SQS, SNS, SES, and EventBridge.",
+      "Built REST APIs for integration with frontend systems and monitoring dashboards.",
+      "Designed DynamoDB schemas for scalable tracking of staff activities and feedback data.",
+      "Applied Infrastructure as Code using AWS CDK with version-controlled deployments and automated testing."
     ],
-    "technologies": ["Linux", "Bash", "Docker", "Monitoring", "Networking"]
+    "technologies": ["AWS", "Lambda", "API Gateway", "DynamoDB", "SQS", "SNS", "SES", "EventBridge", "AWS CDK"]
+  },
+  {
+    "company": "Cloud File Transfer Migration",
+    "role": "Application Support Engineer",
+    "location": "Singapore",
+    "period": "2023 - 2024",
+    "summary": "Led large-scale migration of batch processing systems to a cloud-based file transfer platform with improved reliability and testability.",
+    "highlights": [
+      "Migrated 200+ Spring Batch jobs from legacy GPC system to Cloud File Transfer (CFT) platform.",
+      "Developed reusable tasklets for encryption/decryption, remote execution, and SFTP integration.",
+      "Built Docker-based local simulation environment for production-like testing and debugging.",
+      "Coordinated integration testing, UAT, and production rollout with multiple external systems."
+    ],
+    "technologies": ["Java", "Spring Batch", "Docker", "SFTP", "Linux", "Shell Scripting"]
+  },
+  {
+    "company": "Government Authorization System",
+    "role": "Application Support Engineer",
+    "location": "Singapore",
+    "period": "2016 - 2023",
+    "summary": "Maintained and modernized critical backend systems with focus on reliability, security, and long-term maintainability.",
+    "highlights": [
+      "Upgraded legacy backend systems to align with new infrastructure and security requirements.",
+      "Migrated Java components to newer frameworks and versions.",
+      "Implemented security and compliance enhancements for production systems."
+    ],
+    "technologies": ["Java", "Linux", "Security", "System Modernization"]
+  },
+  {
+    "company": "Government Revenue & Taxation Agency",
+    "role": "TIBCO Developer",
+    "location": "Singapore",
+    "period": "2011 - 2016",
+    "summary": "Developed enterprise integration workflows for data exchange between legacy and modern systems.",
+    "highlights": [
+      "Designed and deployed integration workflows for cross-system data exchange.",
+      "Optimized transformation logic and exception handling for reliability and throughput."
+    ],
+    "technologies": ["TIBCO", "EAI", "Integration", "Middleware"]
+  },
+  {
+    "company": "Telco Service",
+    "role": "EAI Developer",
+    "location": "Singapore",
+    "period": "2008 - 2010",
+    "summary": "Built enterprise integration solutions supporting data transformation across core business systems.",
+    "highlights": [
+      "Developed transformation logic and message mappings across enterprise systems.",
+      "Supported data exchange workflows between multiple business platforms."
+    ],
+    "technologies": ["EAI", "Integration", "Data Transformation"]
   }
 ]
