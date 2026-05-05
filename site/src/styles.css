@@ -20,20 +20,20 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f2f5f8;
+  --bg: #f6f8fb;
   --surface: #ffffff;
-  --surface-2: #f7f9fc;
+  --surface-2: #f3f7fa;
   --text: #0f1a26;
   --muted: #4f5d70;
-  --accent: #0b8d63;
-  --line: #d8e0ea;
-  --shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
-  --terminal-bg: #f8fbfc;
+  --accent: #08795b;
+  --line: #dbe4ec;
+  --shadow: 0 8px 20px rgba(31, 45, 61, 0.06);
+  --terminal-bg: #fbfdff;
   --terminal-panel: #ffffff;
-  --terminal-panel-2: #edf4f7;
-  --terminal-green: #0b8d63;
-  --terminal-cyan: #087a92;
-  --terminal-amber: #a86407;
+  --terminal-panel-2: #f3f7fa;
+  --terminal-green: #08795b;
+  --terminal-cyan: #256f85;
+  --terminal-amber: #9a650f;
   --terminal-red: #c83d4d;
   --avatar-fill: #dde4ea;
 }
@@ -309,11 +309,23 @@ h3 {
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 18%, transparent), var(--bg));
 }
 
+:root[data-theme="light"] .intro-terminal::before {
+  background:
+    linear-gradient(rgba(31, 45, 61, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 45, 61, 0.045) 1px, transparent 1px),
+    var(--bg);
+  background-size: 56px 56px, 56px 56px, auto;
+}
+
+:root[data-theme="light"] .intro-terminal::after {
+  background: linear-gradient(180deg, rgba(246, 248, 251, 0.35), var(--bg));
+}
+
 .intro-shell {
   width: min(1480px, 96vw);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(300px, 0.82fr) minmax(430px, 1.82fr) minmax(150px, 0.34fr);
+  grid-template-columns: minmax(300px, 0.78fr) minmax(430px, 1.66fr) minmax(180px, 0.46fr);
   gap: 1rem;
   align-items: stretch;
   min-height: 560px;
@@ -337,6 +349,16 @@ h3 {
   background: color-mix(in srgb, var(--terminal-panel) 92%, transparent);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
   backdrop-filter: blur(14px);
+}
+
+:root[data-theme="light"] .intro-profile-panel,
+:root[data-theme="light"] .terminal-window,
+:root[data-theme="light"] .command-rail,
+:root[data-theme="light"] .command-card {
+  border-color: color-mix(in srgb, var(--line) 88%, var(--terminal-green));
+  background: var(--terminal-panel);
+  box-shadow: 0 14px 34px rgba(31, 45, 61, 0.08);
+  backdrop-filter: none;
 }
 
 .intro-profile-panel,
@@ -680,7 +702,6 @@ h3 {
   aspect-ratio: 1;
   object-fit: contain;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--terminal-bg) 58%, transparent);
 }
 
 .terminal-record-head {
@@ -824,6 +845,11 @@ h3 {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.5rem;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0.15rem 0.1rem 0.1rem 0;
+  scrollbar-width: thin;
 }
 
 .command-rail {
@@ -935,25 +961,201 @@ h3 {
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.8rem;
+  gap: 0.9rem;
   margin-top: 1rem;
 }
 
-.skill-group {
+.skills-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.skills-heading h2 {
+  margin-top: 0.25rem;
+}
+
+.skills-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.skills-summary div {
+  min-width: 5.5rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  background: color-mix(in srgb, var(--terminal-panel-2) 82%, transparent);
+}
+
+.skills-summary dt {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.skills-summary dd {
+  margin: 0.18rem 0 0;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.skills-control-panel {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.55fr) 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  margin-top: 1rem;
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 0.85rem;
-  background: var(--surface-2);
+  padding: 0.8rem;
+  background: color-mix(in srgb, var(--terminal-panel) 70%, var(--surface));
+}
+
+.skill-search {
+  display: block;
+}
+
+.skill-search input {
+  width: 100%;
+  min-height: 2.55rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 0.85rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.skill-search input::placeholder {
+  color: var(--muted);
+}
+
+.core-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.core-skills span {
+  border: 1px solid color-mix(in srgb, var(--accent) 62%, var(--line));
+  border-radius: 999px;
+  padding: 0.38rem 0.68rem;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.skill-group {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--surface-2) 94%, transparent), var(--surface-2));
   transition: border-color 150ms ease, transform 150ms ease;
 }
 
+.skill-group::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--skill-tone, var(--accent));
+}
+
+.skill-group--green {
+  --skill-tone: var(--terminal-green);
+}
+
+.skill-group--cyan {
+  --skill-tone: var(--terminal-cyan);
+}
+
+.skill-group--amber {
+  --skill-tone: var(--terminal-amber);
+}
+
 .skill-group:hover {
-  border-color: var(--accent);
+  border-color: var(--skill-tone, var(--accent));
   transform: translateY(-2px);
+}
+
+.skill-group-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.skill-group-header p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.skill-group-badge {
+  flex: 0 0 auto;
+  min-width: 2.6rem;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--skill-tone, var(--accent)) 58%, var(--line));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--skill-tone, var(--accent)) 13%, var(--surface));
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 800;
 }
 
 .skill-group .chips {
   margin-top: 0.7rem;
+}
+
+.skill-chips li {
+  background: color-mix(in srgb, var(--terminal-panel-2) 84%, transparent);
+}
+
+.skill-chips li.is-core {
+  border-color: color-mix(in srgb, var(--skill-tone, var(--accent)) 68%, var(--line));
+  background: color-mix(in srgb, var(--skill-tone, var(--accent)) 14%, var(--surface));
+  color: var(--text);
+  font-weight: 700;
+}
+
+.skill-toggle {
+  margin-top: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 2.1rem;
+  padding: 0 0.7rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.skill-toggle:hover {
+  border-color: var(--skill-tone, var(--accent));
+  color: var(--skill-tone, var(--accent));
+}
+
+.skills-empty {
+  display: block;
+  margin: 1rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.8rem;
+  background: var(--surface-2);
+  color: var(--muted);
 }
 
 .cert-grid {
@@ -1333,6 +1535,8 @@ h3 {
 
   .command-deck {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    padding: 0;
   }
 }
 
@@ -1434,6 +1638,23 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .skills-heading,
+  .skills-control-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .skills-heading {
+    flex-direction: column;
+  }
+
+  .skills-summary {
+    width: 100%;
+  }
+
+  .skills-summary div {
+    min-width: 0;
+  }
+
   .skills-grid,
   .cert-grid,
   .project-grid {
@@ -1470,6 +1691,15 @@ h3 {
 }
 
 @media (max-width: 480px) {
+  .skills-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .core-skills span,
+  .chips li {
+    font-size: 0.84rem;
+  }
+
   .project-header {
     flex-direction: column;
     align-items: flex-start;

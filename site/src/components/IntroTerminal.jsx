@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { getSkillName, normalizeSkills } from "../lib/skills";
 
 function isExternalLink(href) {
   if (!href || href.trim() === "" || href.trim() === "#") {
@@ -255,7 +256,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
     return (
       <ul className="terminal-preview-chips" aria-label={ariaLabel}>
         {visible.map((item) => (
-          <li key={item} className="terminal-preview-chip">{item}</li>
+          <li key={getSkillName(item)} className="terminal-preview-chip">{getSkillName(item)}</li>
         ))}
         {renderRemainderChip(remaining)}
       </ul>
@@ -263,13 +264,14 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, skills,
   }
 
   function renderSkillsOutput() {
-    const totalSkills = skills.reduce((total, group) => total + group.items.length, 0);
+    const normalizedSkills = normalizeSkills(skills);
+    const totalSkills = normalizedSkills.reduce((total, group) => total + group.items.length, 0);
 
     return (
       <div className="terminal-output-block terminal-output-block--content">
-        <p className="terminal-line terminal-line--success">Skills index: {skills.length} groups / {totalSkills} signals</p>
+        <p className="terminal-line terminal-line--success">Skills index: {normalizedSkills.length} groups / {totalSkills} signals</p>
         <div className="terminal-record-list">
-          {skills.map((group) => (
+          {normalizedSkills.map((group) => (
             <article key={group.group} className="terminal-record terminal-record--compact">
               <h3>{group.group}</h3>
               {renderPreviewChips(group.items, 5, `${group.group} skill preview`)}
@@ -556,7 +558,24 @@ IntroTerminal.propTypes = {
   skills: PropTypes.arrayOf(
     PropTypes.shape({
       group: PropTypes.string.isRequired,
-      items: PropTypes.arrayOf(PropTypes.string).isRequired
+      order: PropTypes.number,
+      badge: PropTypes.string,
+      tone: PropTypes.string,
+      visibleLimit: PropTypes.number,
+      subcategories: PropTypes.arrayOf(PropTypes.string),
+      aliases: PropTypes.arrayOf(PropTypes.string),
+      items: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            order: PropTypes.number,
+            core: PropTypes.bool,
+            subcategories: PropTypes.arrayOf(PropTypes.string),
+            aliases: PropTypes.arrayOf(PropTypes.string)
+          })
+        ])
+      ).isRequired
     })
   ).isRequired,
   certifications: PropTypes.arrayOf(
