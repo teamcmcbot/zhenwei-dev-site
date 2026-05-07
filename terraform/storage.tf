@@ -29,6 +29,7 @@ resource "aws_s3_bucket_ownership_controls" "site" {
   }
 }
 
+# This policy allows CloudFront to read objects from the S3 bucket, but only if the request comes from the CloudFront distribution associated with this site.
 resource "aws_s3_bucket_policy" "site" {
   bucket = aws_s3_bucket.site.id
   policy = jsonencode({
