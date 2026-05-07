@@ -4,6 +4,7 @@ data "aws_route53_zone" "main" {
   private_zone = false
 }
 
+# Create DNS records to point the site domain to the CloudFront distribution.
 resource "aws_route53_record" "cert_validation" {
   for_each = {
     for dvo in aws_acm_certificate.site.domain_validation_options : dvo.domain_name => {
@@ -20,7 +21,7 @@ resource "aws_route53_record" "cert_validation" {
   ttl     = 60
 }
 
-// Publish the site domain to the CloudFront distribution.
+# Create A and AAAA records to point the site domain to the CloudFront distribution.
 resource "aws_route53_record" "site_a" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = var.domain_name

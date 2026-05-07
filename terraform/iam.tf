@@ -1,4 +1,4 @@
-// Allow GitHub Actions to assume a deploy role via OIDC instead of static AWS keys.
+# Allow GitHub Actions to assume a deploy role via OIDC instead of static AWS keys.
 resource "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 
@@ -9,6 +9,9 @@ resource "aws_iam_openid_connect_provider" "github" {
   tags = var.tags
 }
 
+# Create an IAM role for GitHub Actions to assume when deploying the site.
+# The policy allows listing the bucket and its location (required for the AWS CLI sync command),
+# as well as putting, deleting, and getting objects in the bucket, and creating CloudFront invalidations.
 data "aws_iam_policy_document" "github_assume_role" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]

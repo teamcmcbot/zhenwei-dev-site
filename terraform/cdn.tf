@@ -20,6 +20,7 @@ resource "aws_acm_certificate" "site" {
   tags = var.tags
 }
 
+# Create Route53 validation records for the ACM certificate.
 resource "aws_acm_certificate_validation" "site" {
   provider                = aws.us_east_1
   certificate_arn         = aws_acm_certificate.site.arn

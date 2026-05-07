@@ -1,4 +1,4 @@
-// Store the static site privately in S3 and serve it only through CloudFront.
+# Store the static site privately in S3 and serve it only through CloudFront.
 resource "aws_s3_bucket" "site" {
   bucket = local.bucket_name
   tags   = var.tags
@@ -12,6 +12,7 @@ resource "aws_s3_bucket_versioning" "site" {
   }
 }
 
+# Block all public access to the bucket to ensure it's only accessible through CloudFront.
 resource "aws_s3_bucket_public_access_block" "site" {
   bucket = aws_s3_bucket.site.id
 
@@ -21,6 +22,7 @@ resource "aws_s3_bucket_public_access_block" "site" {
   restrict_public_buckets = true
 }
 
+# Enforce bucket ownership to ensure CloudFront can read from the bucket with its OAC identity.
 resource "aws_s3_bucket_ownership_controls" "site" {
   bucket = aws_s3_bucket.site.id
 
