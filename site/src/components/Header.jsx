@@ -44,7 +44,15 @@ export default function Header({ theme, toggleTheme, brand }) {
 
   return (
     <header className="site-header">
-      <a href="/" className="brand">{brand}</a>
+      <a href="/" className="brand" aria-label={brand}>
+        <img
+          src="/favicon/favicon.svg"
+          alt=""
+          aria-hidden="true"
+          className="brand-mark"
+        />
+        <span>{brand}</span>
+      </a>
 
       <nav
         aria-label="Site navigation"

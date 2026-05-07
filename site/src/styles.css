@@ -106,9 +106,24 @@ a {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   text-decoration: none;
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+
+.brand-mark {
+  width: 2.2rem;
+  height: 2.2rem;
+  display: block;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  object-fit: cover;
+  padding: 0.18rem;
 }
 
 nav {
