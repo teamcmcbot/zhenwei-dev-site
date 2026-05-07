@@ -110,6 +110,31 @@ Deployment flow:
 2. Syncs app assets, HTML, and JSON data to S3 with cache-control split by file type
 3. Invalidates CloudFront (full path for app deploy, /data/* for data-only deploy)
 
+## Local pre-commit hook (Terraform fmt)
+
+This repository includes a shared pre-commit configuration in `.pre-commit-config.yaml`.
+
+What it does:
+
+- On `git commit`, if staged files include `terraform/*.tf`, it runs `terraform fmt -check -recursive terraform`.
+- If formatting changes are needed, commit stops and shows which files are not formatted.
+- Then run `terraform fmt -recursive terraform`, stage changes, and commit again.
+
+One-time local setup:
+
+```bash
+pip3 install pre-commit
+pre-commit install
+```
+
+Manual run (all files):
+
+```bash
+pre-commit run --all-files
+```
+
+CI should still enforce formatting with `terraform fmt -check -recursive` for repository-level enforcement.
+
 ## Security model
 
 - GitHub Actions assumes AWS IAM role via OIDC
