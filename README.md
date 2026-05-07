@@ -4,7 +4,9 @@ Personal DevOps CV portfolio site hosted on AWS with Terraform-managed infrastru
 
 ## Architecture
 
-- Frontend: Static HTML/CSS/JavaScript in site/
+- Frontend: React SPA built with Vite in site/
+- Runtime data: JSON files served from site/public/data/
+- Canonical profile payload: intro.json contains identity/about/contact/terminal content
 - Hosting: Amazon S3 (private bucket)
 - CDN: Amazon CloudFront with Origin Access Control
 - DNS: Amazon Route53
@@ -17,7 +19,7 @@ User -> Route53 -> CloudFront -> S3
 
 ## Repository structure
 
-- site/: portfolio frontend files
+- site/: React app source, public data files, and build output
 - terraform/: IaC for S3, CloudFront, Route53, ACM, IAM OIDC role
 - .github/workflows/: all CI/CD automation — the only deployment path
 
@@ -95,11 +97,18 @@ In GitHub repo settings:
 
 ## 3) Deploy website
 
-All deployments happen automatically via GitHub Actions. Push any change to site/ on main and the workflow:
+Deployments run from GitHub Actions workflow_dispatch in .github/workflows/deploy.yml.
+
+Choose one deploy mode when running the workflow manually:
+
+- app: build and deploy full site output
+- data: deploy JSON files only from site/public/data
+
+Deployment flow:
 
 1. Authenticates to AWS using OIDC (no stored credentials)
-2. Syncs static assets to S3 with correct cache headers
-3. Invalidates the CloudFront distribution
+2. Syncs app assets, HTML, and JSON data to S3 with cache-control split by file type
+3. Invalidates CloudFront (full path for app deploy, /data/* for data-only deploy)
 
 ## Security model
 
@@ -110,6 +119,7 @@ All deployments happen automatically via GitHub Actions. Push any change to site
 
 ## Next customization
 
-- Replace placeholder CV sections in site/index.html with your actual experience and projects.
-- Add your profile image and project screenshots in site/assets/.
+- Update content under site/public/data/ (intro.json, skills.json, certifications.json, experiences.json, projects.json, aws-static-hosting.json).
+- Use npm run dev in site/ for local iteration and npm run build for production validation.
+- Add your profile image and project screenshots under site/public/assets/.
 - Optionally add a strict Content-Security-Policy header via CloudFront response headers policy.

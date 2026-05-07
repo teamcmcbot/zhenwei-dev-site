@@ -1,21 +1,21 @@
 {
   "title": "AWS Static Hosting Architecture",
-  "summary": "This website is intentionally built as a static, data-driven app to demonstrate practical AWS hosting and deployment patterns.",
+  "summary": "This website is intentionally built as a static, data-driven React app to demonstrate practical AWS hosting, caching, and deployment patterns.",
   "requestFlow": [
     "Visitor requests zhenwei.dev",
     "Route53 resolves the domain",
     "CloudFront serves cached assets over HTTPS",
-    "CloudFront retrieves origin files from S3 when needed",
-    "React loads JSON files from /data and renders the portfolio"
+    "CloudFront retrieves origin files from the private S3 bucket when needed",
+    "The React app loads JSON files from /data and renders the portfolio"
   ],
   "components": [
     {
       "name": "S3",
-      "purpose": "Stores the built React app and JSON content files."
+      "purpose": "Stores the built Vite app and runtime JSON content files."
     },
     {
       "name": "CloudFront",
-      "purpose": "Provides CDN caching, HTTPS entry point, and SPA routing behavior."
+      "purpose": "Provides CDN caching, HTTPS entry point, and SPA routing behavior in front of the private S3 origin."
     },
     {
       "name": "Route53",
@@ -27,7 +27,7 @@
     },
     {
       "name": "GitHub Actions",
-      "purpose": "Builds and deploys the app and JSON content after changes are merged."
+      "purpose": "Runs manual deployment workflows for either the full app build or data-only updates."
     },
     {
       "name": "OIDC + IAM",
@@ -35,14 +35,14 @@
     }
   ],
   "pipelineDemo": {
-    "title": "Content Update Demo",
+    "title": "Current Deployment Flow",
     "steps": [
-      "Update or add a JSON file under public/data",
-      "Open a pull request and review the content change",
-      "Merge to main",
-      "GitHub Actions syncs the changed data files to S3",
-      "CloudFront cache is invalidated for the affected paths",
-      "The live website renders the new content without changing application code"
+      "Update app code or JSON content in the repository",
+      "Run the GitHub Actions workflow manually with deploy_type set to app or data",
+      "GitHub Actions assumes the AWS deploy role using OIDC",
+      "The workflow syncs build output or JSON data to S3 with cache-control rules by content type",
+      "CloudFront cache is invalidated for either all paths or only /data/*",
+      "The live website serves the updated application or content"
     ]
   }
 }

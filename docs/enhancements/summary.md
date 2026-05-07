@@ -46,7 +46,7 @@ This allows content updates by changing JSON files while keeping infrastructure 
 ### Components
 
 - App shell: `index.html` + bundled JS/CSS assets
-- Data layer: `/data/*.json` files (about, experiences, projects, etc.)
+- Data layer: `/data/*.json` files (`intro` plus section datasets)
 - Hosting: AWS S3 (private bucket)
 - CDN and HTTPS: AWS CloudFront
 - DNS: AWS Route53
@@ -74,12 +74,10 @@ zhenwei-dev-site/
 │   ├── assets/
 │   └── public/
 │       └── data/
-│           ├── about.json
+│           ├── intro.json
 │           ├── aws-static-hosting.json
 │           ├── certifications.json
-│           ├── contact.json
 │           ├── experiences.json
-│           ├── profile.json
 │           ├── projects.json
 │           └── skills.json
 ├── terraform/
@@ -111,7 +109,7 @@ After Terraform apply and GitHub repo secrets/variables are configured:
 
 1. Build React app into `site/dist`
 2. Upload static assets and HTML to S3 with appropriate cache headers
-3. Keep `/data/*.json` as independent runtime content files
+3. Keep `/data/*.json` as independent runtime content files, with identity/about/contact consolidated in `intro.json`
 4. Invalidate CloudFront cache (all paths or targeted data paths)
 
 Planned improvement:
