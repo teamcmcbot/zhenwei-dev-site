@@ -1,48 +1,68 @@
 {
   "title": "AWS Static Hosting Architecture",
-  "summary": "This website is intentionally built as a static, data-driven React app to demonstrate practical AWS hosting, caching, and deployment patterns.",
+  "summary": "This website is intentionally built as a secure, static, data-driven React application to demonstrate modern AWS hosting, CDN caching, private S3 origins, and CI/CD deployment patterns using CloudFront, Route53, ACM, and GitHub Actions with OIDC authentication.",
+
   "requestFlow": [
-    "Visitor requests zhenwei.dev",
-    "Route53 resolves the domain",
-    "CloudFront serves cached assets over HTTPS",
-    "CloudFront retrieves origin files from the private S3 bucket when needed",
-    "The React app loads JSON files from /data and renders the portfolio"
+    "A visitor accesses https://zhenwei.dev",
+    "Route53 resolves the domain to the CloudFront distribution using Alias A/AAAA records",
+    "The browser sends an HTTPS request to CloudFront using the TLS certificate provided by ACM",
+    "CloudFront serves cached content directly from edge locations whenever possible",
+    "On cache miss, CloudFront sends a signed origin request to the private S3 bucket using Origin Access Control (OAC)",
+    "S3 validates the signed request and returns the requested files to CloudFront",
+    "CloudFront caches the origin response and serves the application to the visitor over HTTPS",
+    "The React application dynamically loads JSON content from the /data directory and renders the portfolio UI"
   ],
+
   "components": [
     {
-      "name": "S3",
-      "purpose": "Stores the built Vite app and runtime JSON content files."
+      "name": "Amazon S3",
+      "purpose": "Stores the built Vite/React application assets and runtime JSON content files inside a private S3 bucket."
     },
     {
-      "name": "CloudFront",
-      "purpose": "Provides CDN caching, HTTPS entry point, and SPA routing behavior in front of the private S3 origin."
+      "name": "Amazon CloudFront",
+      "purpose": "Acts as the global CDN layer providing HTTPS termination, edge caching, SPA routing behavior, and secure access to the private S3 origin."
     },
     {
-      "name": "Route53",
-      "purpose": "Maps zhenwei.dev to the CloudFront distribution."
+      "name": "Amazon Route53",
+      "purpose": "Hosts the zhenwei.dev DNS zone and maps the domain to the CloudFront distribution using Alias records."
     },
     {
-      "name": "ACM",
-      "purpose": "Provides the TLS certificate for HTTPS."
+      "name": "AWS Certificate Manager (ACM)",
+      "purpose": "Provides and automatically renews the TLS certificate used by CloudFront for HTTPS traffic."
+    },
+    {
+      "name": "Origin Access Control (OAC)",
+      "purpose": "Allows CloudFront to securely access the private S3 bucket using signed SigV4 origin requests."
+    },
+    {
+      "name": "S3 Bucket Policy + Public Access Block",
+      "purpose": "Ensures the S3 bucket remains private and only allows access from the configured CloudFront distribution."
     },
     {
       "name": "GitHub Actions",
-      "purpose": "Runs manual deployment workflows for either the full app build or data-only updates."
+      "purpose": "Runs deployment workflows for either full application deployments or data-only updates."
     },
     {
-      "name": "OIDC + IAM",
-      "purpose": "Allows GitHub Actions to deploy without storing long-lived AWS access keys."
+      "name": "OIDC + IAM Deploy Role",
+      "purpose": "Allows GitHub Actions to securely authenticate and deploy to AWS without storing long-lived AWS access keys."
     }
   ],
+
   "pipelineDemo": {
     "title": "Current Deployment Flow",
     "steps": [
-      "Update app code or JSON content in the repository",
-      "Run the GitHub Actions workflow manually with deploy_type set to app or data",
-      "GitHub Actions assumes the AWS deploy role using OIDC",
-      "The workflow syncs build output or JSON data to S3 with cache-control rules by content type",
-      "CloudFront cache is invalidated for either all paths or only /data/*",
-      "The live website serves the updated application or content"
+      "Application code or JSON content files are updated in the GitHub repository",
+      "A GitHub Actions workflow is manually triggered with deploy_type set to either app or data",
+      "GitHub Actions authenticates to AWS using OIDC federation and assumes the GitHub deployment IAM role",
+      "The workflow uploads or syncs the generated build assets or JSON content files to the private S3 bucket",
+      "Cache-Control headers are applied differently depending on content type to optimize browser and CDN caching",
+      "CloudFront cache invalidation is triggered for either the entire site or specific paths such as /data/*",
+      "CloudFront edge locations begin serving the updated application or content globally over HTTPS"
     ]
+  },
+
+  "architecture": {
+    "title": "Architecture Diagram",
+    "diagram": "/assets/diagram/aws-s3-architecture.svg"
   }
 }

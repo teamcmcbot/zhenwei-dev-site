@@ -70,6 +70,7 @@ export default function App() {
             <Certifications certifications={state.data.certifications} />
             <Experience experiences={state.data.experiences} />
             <Projects projects={state.data.projects} />
+            <hr className="section-divider" />
             <AwsStaticHosting data={state.data.awsStaticHosting} />
           </>
         )}

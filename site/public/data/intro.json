@@ -32,6 +32,7 @@
       { "name": "certs", "label": "certs", "description": "View certifications and credentials" },
       { "name": "experience", "label": "experience", "description": "Preview experience highlights" },
       { "name": "projects", "label": "projects", "description": "Preview project evidence" },
+      { "name": "architecture", "label": "architecture", "description": "Jump to the site infrastructure view" },
       { "name": "clear", "label": "clear", "description": "Reset the terminal output" }
     ]
   },
