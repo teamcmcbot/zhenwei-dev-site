@@ -4,7 +4,8 @@
 
 Replace the static PDF link with a short-lived AWS presigned URL generated on-demand.
 A Lambda function (behind API Gateway) creates the URL each time the button is clicked,
-so the actual PDF lives in a **private** S3 bucket that is never publicly accessible.
+and returns it as JSON. The browser then starts the download using that URL.
+The actual PDF lives in a **private** S3 bucket that is never publicly accessible.
 
 This is deliberately over-engineered relative to the problem — it serves as a live
 showcase of AWS serverless + IAM least-privilege patterns on a personal site.
@@ -23,20 +24,28 @@ API Gateway (HTTP API)
   ▼
 Lambda (Python)
   │  generates presigned URL (TTL = 300 s)
+  │  returns 200 JSON { url, fileName }
   ▼
-S3 Presigned URL (302 redirect)
+Browser uses presigned URL
   │
   ▼
 Private S3 Bucket  ←  manual upload only, never in git
   (resume PDF)
 ```
 
-### Why a redirect instead of streaming through Lambda?
+### Why this instead of streaming through Lambda?
 
 - Lambda response payload limit is 6 MB (10 MB with response streaming).
 - A presigned URL offloads bandwidth to S3 and avoids that limit.
-- The browser receives a `302` and downloads directly from S3.
+- The browser downloads directly from S3 using the returned presigned URL.
 - S3 presigned URLs work even on private buckets — the signature grants temporary access.
+
+### Why JSON response instead of 302 redirect?
+
+- The architecture/security model is the same: API + Lambda still generates a short-lived presigned URL.
+- Returning `200` JSON gives the frontend reliable control over UX states (`requesting`, `downloading`, `done`, `error`).
+- Cross-origin redirect handling with `fetch()` is harder to inspect/debug in JavaScript.
+- JSON makes terminal-style output and error handling straightforward while keeping the over-engineered showcase value.
 
 ---
 
@@ -86,12 +95,7 @@ TTL      = int(os.environ.get("URL_TTL_SECONDS", "300"))
 
 s3 = boto3.client("s3")
 
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",")
-
-
 def handler(event, context):
-    origin = (event.get("headers") or {}).get("origin", "")
-
     try:
         url = s3.generate_presigned_url(
             "get_object",
@@ -108,16 +112,17 @@ def handler(event, context):
             "body": json.dumps({"error": "Could not generate download URL"}),
         }
 
-    cors_origin = origin if origin in ALLOWED_ORIGINS else ALLOWED_ORIGINS[0]
-
     return {
-        "statusCode": 302,
+        "statusCode": 200,
         "headers": {
-            "Location": url,
-            "Access-Control-Allow-Origin": cors_origin,
+          "Content-Type": "application/json",
             "Cache-Control": "no-store",
         },
-        "body": "",
+        "body": json.dumps({
+          "url": url,
+          "fileName": FILENAME,
+          "expiresIn": TTL,
+        }),
     }
 ```
 
@@ -129,7 +134,11 @@ def handler(event, context):
 | `RESUME_KEY` | `zhenwei-seo-cv.pdf` |
 | `RESUME_FILENAME` | `zhenwei-seo-cv.pdf` |
 | `URL_TTL_SECONDS` | `300` |
-| `ALLOWED_ORIGINS` | `https://zhenwei.dev,https://www.zhenwei.dev` |
+
+Note:
+
+- Keep CORS configuration in API Gateway HTTP API configuration.
+- Keep Lambda focused on URL generation and response payload.
 
 ---
 
@@ -220,7 +229,7 @@ resource "aws_apigatewayv2_stage" "default" { ... }
 resource "aws_lambda_permission" "apigw_resume" { ... }
 ```
 
-Output the invoke URL so it can be copy-pasted into `intro.json`:
+Output the invoke URL so it can be configured in deployment environment variables:
 
 ```hcl
 output "resume_api_url" {
@@ -228,27 +237,66 @@ output "resume_api_url" {
 }
 ```
 
+Use this output for `VITE_RESUME_API_URL` in CI/CD for dev/prod builds.
+
 ---
 
 ## Frontend Change (post-deploy)
 
-After the API is deployed, update `site/public/data/intro.json`:
+After the API is deployed, keep `resumeAction` in `site/public/data/intro.json` for label/fallback,
+and move environment-dependent behavior to Vite environment variables.
+
+Recommended `resumeAction` shape:
 
 ```json
 "resumeAction": {
   "label": "Download CV",
-  "href": "https://api.zhenwei.dev/resume/download",
-  "download": false
+  "href": "/assets/resume/zhenwei-seo-cv.pdf",
+  "download": true,
+  "fileName": "zhenwei-seo-cv.pdf"
 }
 ```
 
-Setting `"download": false` makes the button navigate to the API URL (which issues
-the `302` redirect) rather than using the HTML `download` attribute, which does not
-follow cross-origin redirects correctly.
+The API URL should come from environment variables (not hard-coded in JSON).
 
-Optionally set up a custom domain (`api.zhenwei.dev`) mapped to the API Gateway stage
-and add a Route 53 A-record (alias) — this keeps the URL clean and avoids exposing the
-raw `execute-api` hostname in the source code.
+### Environment behavior (local/dev/prod)
+
+Use Vite env variables:
+
+```bash
+# .env.local (developer machine)
+VITE_APP_ENV=local
+VITE_RESUME_MODE=local-static
+VITE_RESUME_API_URL=
+
+# .env.development (shared dev environment build)
+VITE_APP_ENV=dev
+VITE_RESUME_MODE=api
+VITE_RESUME_API_URL=https://api-dev.zhenwei.dev/resume/download
+
+# .env.production (production build)
+VITE_APP_ENV=prod
+VITE_RESUME_MODE=api
+VITE_RESUME_API_URL=https://api.zhenwei.dev/resume/download
+```
+
+Recommended behavior matrix:
+
+| Environment | Mode | Button behavior |
+|---|---|---|
+| local | `local-static` | Download from `/assets/resume/...` in local project files |
+| dev | `api` | Call API, get presigned URL JSON, trigger browser download |
+| prod | `api` | Call API, get presigned URL JSON, trigger browser download |
+
+Fallback strategy:
+
+- Local: always use static file fallback (`/assets/resume/...`).
+- Dev/Prod: API-first. Optional emergency fallback to static only if you intentionally ship a public copy (not recommended for this v2 goal).
+
+This gives clean local development while preserving private-bucket behavior in deployed environments.
+
+Optionally set up custom domains (`api-dev.zhenwei.dev`, `api.zhenwei.dev`) mapped to API
+Gateway stages. This keeps URLs clean and avoids exposing raw `execute-api` hostnames.
 
 ---
 
@@ -259,9 +307,9 @@ raw `execute-api` hostname in the source code.
 3. Extend the GitHub OIDC deploy role policy in `terraform/iam.tf`.
 4. `terraform plan` → review → `terraform apply`.
 5. Upload PDF: `aws s3 cp ... s3://<resume-bucket>/zhenwei-seo-cv.pdf`.
-6. Copy `resume_api_url` output → update `intro.json` `resumeAction.href`.
+6. Set CI/CD environment variables (`VITE_APP_ENV`, `VITE_RESUME_MODE`, `VITE_RESUME_API_URL`).
 7. `npm run build` → push → CI deploys site.
-8. Verify end-to-end: button → API → 302 → PDF download.
+8. Verify end-to-end: button/command → API → `200 {url,fileName}` → S3 download.
 
 ---
 
@@ -275,8 +323,9 @@ raw `execute-api` hostname in the source code.
 | `terraform/iam.tf` | Modify — extend deploy role permissions |
 | `terraform/variables.tf` | Modify — add `resume_key`, `url_ttl_seconds` variables |
 | `terraform/outputs.tf` | Modify — add `resume_api_url` output |
-| `site/public/data/intro.json` | Modify — update `resumeAction.href` and `download: false` |
+| `site/public/data/intro.json` | Keep static fallback path/label for local fallback |
 | `site/public/assets/resume/README.md` | Remove or keep as placeholder |
+| `.env.local` / CI environment vars | Add environment-specific resume mode and API URL |
 
 ---
 
@@ -415,25 +464,16 @@ When `runCommand("resume")` is called:
 
 1. `setActiveCommand("resume")` — shows the output block.
 2. `setResumeState("requesting")`.
-3. `fetch(API_URL)` — API returns `302` with `Location` header.
-   - Because `fetch` follows redirects by default, use `redirect: "manual"` or
-     parse the response URL to extract the presigned URL, then create a temporary
-     `<a download>` element and `.click()` it programmatically.
-4. On success: `setResumeState("downloading")` → short `setTimeout` →
-   `setResumeState("done")`.
-5. On failure: `setResumeState("error")`.
+3. `fetch(API_URL)` — API returns `200` JSON with `{ url, fileName }`.
+4. Create a temporary `<a>` with `href=url` and `download=fileName`, then `.click()`.
+5. On success: `setResumeState("downloading")` → short `setTimeout` → `setResumeState("done")`.
+6. On failure: `setResumeState("error")`.
+ 
+If `VITE_RESUME_MODE=local-static`, skip API and use existing static `resumeAction.href` directly.
 
-> **Cross-origin redirect note:** `fetch` with `redirect: "follow"` on a cross-origin
-> `302` to S3 will succeed for the download, but the response will be `opaque` (type
-> `"opaque"`), meaning you cannot read status or headers. To keep the UX honest
-> (detecting real errors), use `redirect: "manual"` and read `response.headers.get("Location")`
-> — but this requires the API to set `Access-Control-Expose-Headers: Location`.
-> Alternatively, change the Lambda to return `200` with `{"url": "..."}` JSON and
-> let the frontend trigger the download — simpler to implement and easier to test.
+### JSON response approach (recommended)
 
-### JSON response approach (recommended for frontend simplicity)
-
-Change the Lambda to return `200 + JSON` instead of `302`:
+Lambda returns `200 + JSON`:
 
 ```python
 return {
@@ -453,8 +493,7 @@ a.download = fileName;
 a.click();
 ```
 
-This is easier to handle error states from and avoids CORS preflight complexities
-with the `Location` header.
+This is easier to handle error states from and keeps frontend behavior deterministic.
 
 ### Animated wget progress (CSS)
 
@@ -468,7 +507,7 @@ to 100%.
 | File | Change |
 |---|---|
 | `site/src/components/IntroTerminal.jsx` | Add `resumeState` state, `renderResumeOutput()`, `resume` case in `renderOutput()`, download trigger logic in `runCommand()` |
-| `site/public/data/intro.json` | Add `resume` entry to `terminal.commands` array; add `resumeApiUrl` field to `identity` or `resumeAction` |
+| `site/public/data/intro.json` | Add `resume` entry to `terminal.commands` array; keep static fallback `resumeAction.href` |
 | `site/src/styles.css` | Add `.terminal-wget-block`, `.terminal-wget-bar` animation styles |
 
 ---
@@ -476,7 +515,10 @@ to 100%.
 ## v1 Status
 
 Current v1 ships with a **static path** pointing to `/assets/resume/zhenwei-seo-cv.pdf`.
-Place the actual PDF at `site/public/assets/resume/zhenwei-seo-cv.pdf` before
-publishing — it will be served directly from CloudFront.
 
-The presigned URL approach is a v2 enhancement. v1 is fully functional without it.
+v2 recommendation keeps that path as local fallback only:
+
+- Local development: static file fallback is allowed and convenient.
+- Deployed dev/prod: API + presigned URL flow is the primary behavior.
+
+This keeps local DX simple while preserving the private-bucket showcase in cloud environments.
