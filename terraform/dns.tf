@@ -4,6 +4,10 @@ data "aws_route53_zone" "main" {
   private_zone = false
 }
 
+locals {
+  create_google_site_verification_txt = trimspace(var.google_site_verification_txt) != ""
+}
+
 # Create DNS records to point the site domain to the CloudFront distribution.
 resource "aws_route53_record" "cert_validation" {
   for_each = {
@@ -44,4 +48,15 @@ resource "aws_route53_record" "site_aaaa" {
     zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
     evaluate_target_health = false
   }
+}
+
+# Optionally create a TXT record for Google Search Console site ownership verification if the value is provided.
+resource "aws_route53_record" "google_site_verification" {
+  count = local.create_google_site_verification_txt ? 1 : 0
+
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.domain_name
+  type    = "TXT"
+  ttl     = 300
+  records = [var.google_site_verification_txt]
 }

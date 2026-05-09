@@ -32,6 +32,12 @@ variable "github_branch" {
   default     = "main"
 }
 
+variable "google_site_verification_txt" {
+  description = "Google Search Console TXT record value (for example google-site-verification=xxxx). Leave empty to skip creating the record."
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "Additional tags."
   type        = map(string)
