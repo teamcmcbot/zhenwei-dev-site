@@ -20,6 +20,24 @@ variable "aws_region" {
   default     = "ap-southeast-1"
 }
 
+variable "private_bucket_name" {
+  description = "Private S3 bucket name used for presigned URL files."
+  type        = string
+  default     = "zhenwei-private-bucket"
+}
+
+variable "presign_reader_role_arns" {
+  description = "IAM role/user ARNs allowed to read objects for presigned URL generation (managed by the API repo)."
+  type        = list(string)
+  default     = []
+}
+
+variable "uploader_role_arns" {
+  description = "IAM role/user ARNs allowed to upload/delete private objects."
+  type        = list(string)
+  default     = []
+}
+
 variable "github_repo" {
   description = "GitHub repository in owner/name format used by OIDC trust policy."
   type        = string

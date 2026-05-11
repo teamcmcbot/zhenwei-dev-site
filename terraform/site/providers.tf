@@ -10,7 +10,7 @@ terraform {
 
   backend "s3" {
     bucket       = "zhenwei-terraform-tfstate"
-    key          = "zhenwei-dev-site/terraform.tfstate"
+    key          = "zhenwei-dev-site/site/terraform.tfstate"
     region       = "ap-southeast-1"
     use_lockfile = true
   }

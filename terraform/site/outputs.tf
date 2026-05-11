@@ -17,3 +17,13 @@ output "github_deploy_role_arn" {
   description = "IAM role ARN for GitHub Actions OIDC deploys."
   value       = aws_iam_role.github_deploy.arn
 }
+
+output "private_bucket_name" {
+  description = "Private bucket name for presigned URL files."
+  value       = module.private_files_bucket.bucket_name
+}
+
+output "private_bucket_arn" {
+  description = "Private bucket ARN for API repo policy wiring."
+  value       = module.private_files_bucket.bucket_arn
+}

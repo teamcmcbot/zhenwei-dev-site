@@ -2,11 +2,16 @@
 
 This directory manages the infrastructure for the `zhenwei.dev` portfolio site.
 
-It is intentionally scoped to the site stack, not the full DNS foundation.
+This repository now uses a single Terraform root stack at `terraform/site/`.
+
+It manages the site infrastructure plus a private bucket for presigned URL download flows.
+
+A reusable module now exists at `terraform/modules/s3_private_bucket/` and is consumed by the root stack in `terraform/site/private_files.tf`.
 
 What this stack owns:
 
-- Private S3 bucket for static site assets
+- Primary private S3 bucket for the static site
+- Private S3 bucket for presigned resume PDF downloads (managed through module)
 - CloudFront distribution in front of the bucket
 - ACM certificate for the site domain
 - Route53 records needed by this site
@@ -22,15 +27,24 @@ The hosted zone is looked up as existing infrastructure using `data "aws_route53
 
 ## Current File Layout
 
+Root stack (`terraform/site/`):
+
 - `providers.tf`: Terraform version, AWS provider requirements, S3 backend, and provider configuration
 - `main.tf`: shared locals only
-- `storage.tf`: private S3 bucket, versioning, public access block, ownership controls, and bucket policy
+- `storage.tf`: primary private S3 bucket, versioning, public access block, ownership controls, and bucket policy
+- `private_files.tf`: module call for private bucket used by presigned download flow
 - `cdn.tf`: CloudFront OAC, ACM certificate, certificate validation, and CloudFront distribution
 - `dns.tf`: existing hosted zone lookup plus ACM validation and site alias records
 - `iam.tf`: GitHub OIDC provider, trust policy, deploy role, and deploy permissions
-- `variables.tf`: input variables for domain, region, repo, and tags
+- `variables.tf`: input variables for domain, region, repo, DNS verification, and tags
 - `outputs.tf`: values needed by GitHub Actions and operators
 - `terraform.tfvars.example`: example input file with placeholders
+
+Reusable module (`terraform/modules/s3_private_bucket/`):
+
+- `main.tf`: private bucket resource, versioning, ownership controls, public access block, and policy document
+- `variables.tf`: bucket name, tags, versioning flag, and reader/writer principal ARNs
+- `outputs.tf`: private bucket name and ARN
 
 ## How The Current Configuration Works
 
@@ -52,7 +66,7 @@ Why two AWS providers exist:
 
 ### 2. Existing Hosted Zone Lookup
 
-`main.tf` starts by looking up the existing public Route53 hosted zone:
+`dns.tf` looks up the existing public Route53 hosted zone:
 
 ```hcl
 data "aws_route53_zone" "main" {
@@ -83,7 +97,21 @@ The bucket is configured with:
 
 This bucket is not public. CloudFront is the only intended reader.
 
-### 4. CloudFront Access to S3
+### 4. Private Bucket Module for Presigned Downloads
+
+`private_files.tf` calls the reusable module at `../modules/s3_private_bucket`.
+
+That module creates and manages the private files bucket with:
+
+- Versioning and ownership controls
+- Public access block
+- TLS-only access (`DenyInsecureTransport`)
+- Optional read principals (`presign_reader_role_arns`)
+- Optional write/list principals (`uploader_role_arns`)
+
+This keeps private bucket policy logic reusable and isolated from the root stack.
+
+### 5. CloudFront Access to S3
 
 The stack creates a CloudFront Origin Access Control (OAC) and attaches it to the distribution.
 
@@ -97,7 +125,7 @@ Result:
 - Traffic is forced through CloudFront
 - TLS, caching, and CDN delivery happen at CloudFront
 
-### 5. ACM Certificate
+### 6. ACM Certificate
 
 The certificate is created in `us-east-1` using the aliased provider:
 
@@ -117,7 +145,7 @@ Terraform then:
 
 This is the correct pattern for CloudFront because CloudFront only accepts ACM certificates from `us-east-1`.
 
-### 6. CloudFront Distribution
+### 7. CloudFront Distribution
 
 The distribution is configured to:
 
@@ -129,17 +157,18 @@ The distribution is configured to:
 
 Those custom error responses are useful for static single-page-style routing and friendly fallback behavior.
 
-### 7. Route53 Records Managed By This Stack
+### 8. Route53 Records Managed By This Stack
 
 This stack manages only site-specific DNS records:
 
 - ACM validation records
 - `A` alias record for `var.domain_name` to CloudFront
 - `AAAA` alias record for IPv6 support to CloudFront
+- Optional Google site verification TXT record (when `google_site_verification_txt` is set)
 
 It does not manage the hosted zone itself.
 
-### 8. GitHub Actions OIDC Access
+### 9. GitHub Actions OIDC Access
 
 The stack creates:
 
@@ -170,6 +199,10 @@ The main inputs are:
 - `aws_region`: main AWS region for non-ACM resources
 - `github_repo`: GitHub repo allowed to deploy
 - `github_branch`: branch allowed to deploy
+- `private_bucket_name`: bucket name for the presigned resume file flow
+- `presign_reader_role_arns`: reader principals for the private bucket, usually the API Lambda execution role
+- `uploader_role_arns`: optional upload/delete principals for the private bucket
+- `google_site_verification_txt`: optional TXT value for Google Search Console verification
 - `tags`: extra AWS tags
 
 Example values belong in a local `terraform.tfvars` file copied from `terraform.tfvars.example`.
@@ -182,13 +215,15 @@ This stack outputs:
 - `cloudfront_distribution_id`
 - `cloudfront_domain_name`
 - `github_deploy_role_arn`
+- `private_bucket_name`
+- `private_bucket_arn`
 
 These are used to configure the GitHub Actions workflow.
 
 ## Expected Apply Flow
 
 1. Terraform reads the existing hosted zone.
-2. Terraform creates the S3 bucket and CloudFront OAC.
+2. Terraform creates the primary S3 bucket, private-files module bucket, and CloudFront OAC.
 3. Terraform requests the ACM certificate in `us-east-1`.
 4. Terraform creates Route53 validation records.
 5. ACM validates the certificate.
@@ -207,7 +242,7 @@ These are used to configure the GitHub Actions workflow.
 ## Typical Usage
 
 ```bash
-cd terraform
+cd terraform/site
 cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform plan
