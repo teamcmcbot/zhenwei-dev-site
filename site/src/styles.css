@@ -500,10 +500,46 @@ h3 {
   cursor: pointer;
 }
 
+.intro-build-metadata {
+  margin-top: auto;
+  min-width: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.intro-build-metadata p {
+  margin: 0;
+  min-width: 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.intro-build-metadata p > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.intro-build-metadata span:first-child {
+  color: var(--terminal-cyan);
+  letter-spacing: 0;
+}
+
+.intro-build-metadata a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.intro-build-metadata a:hover,
+.intro-build-metadata a:focus-visible {
+  color: var(--terminal-green);
+  text-decoration: underline;
+}
+
 .intro-profile-contact {
   display: grid;
   gap: 0.65rem;
-  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid var(--line);
 }

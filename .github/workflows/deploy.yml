@@ -38,6 +38,31 @@ jobs:
             exit 1
           fi
 
+      - name: Write deployment metadata
+        run: |
+          mkdir -p site/public/data
+          DEPLOYED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          COMMIT_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+
+          cat > site/public/data/deployment.json <<EOF
+          {
+            "environment": "production",
+            "deployedAt": "${DEPLOYED_AT}",
+            "runId": "${GITHUB_RUN_ID}",
+            "runNumber": "${GITHUB_RUN_NUMBER}",
+            "runAttempt": "${GITHUB_RUN_ATTEMPT}",
+            "runUrl": "${RUN_URL}",
+            "sha": "${GITHUB_SHA}",
+            "shortSha": "${SHORT_SHA}",
+            "commitUrl": "${COMMIT_URL}",
+            "ref": "${GITHUB_REF_NAME}",
+            "actor": "${GITHUB_ACTOR}",
+            "deployType": "${{ inputs.deploy_type }}"
+          }
+          EOF
+
       - name: Set up Node.js
         if: ${{ inputs.deploy_type == 'app' }}
         uses: actions/setup-node@v6

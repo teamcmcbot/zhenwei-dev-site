@@ -98,7 +98,41 @@ function scrollToSection(sectionId) {
   globalThis.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
 }
 
-export default function IntroTerminal({ intro, theme, easterEggUnlocked, onHide, onUnhide, skills, certifications, experiences, projects }) {
+function formatDeployTime(value) {
+  if (!value) {
+    return "Local preview";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  const parts = new Intl.DateTimeFormat("en-SG", {
+    timeZone: "Asia/Singapore",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  }).formatToParts(date);
+
+  const dateParts = Object.fromEntries(
+    parts
+      .filter(({ type }) => type !== "literal")
+      .map(({ type, value }) => [type, value])
+  );
+
+  return `${dateParts.day} ${dateParts.month} ${dateParts.year} ${dateParts.hour}:${dateParts.minute} ${dateParts.dayPeriod.toUpperCase()}`;
+}
+
+function getShortSha(deployment) {
+  return deployment?.shortSha || deployment?.sha?.slice(0, 7) || "";
+}
+
+export default function IntroTerminal({ intro, theme, deployment, easterEggUnlocked, onHide, onUnhide, skills, certifications, experiences, projects }) {
   const [activeCommand, setActiveCommand] = useState("welcome");
   const [inputValue, setInputValue] = useState("");
   const [unknownCommand, setUnknownCommand] = useState("");
@@ -299,6 +333,40 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, onHide,
             );
           })}
         </div>
+      </div>
+    );
+  }
+
+  function renderBuildMetadata() {
+    const formattedDeployTime = formatDeployTime(deployment?.deployedAt);
+    const shortSha = getShortSha(deployment);
+    const commitUrl = deployment?.commitUrl;
+
+    return (
+      <div className="intro-build-metadata" aria-label="Build metadata">
+        <p>
+          <span>Last Build:</span>{" "}
+          {deployment?.runUrl ? (
+            <a href={deployment.runUrl} target="_blank" rel="noopener noreferrer">
+              <time dateTime={deployment?.deployedAt || undefined}>{formattedDeployTime}</time>
+            </a>
+          ) : (
+            <time dateTime={deployment?.deployedAt || undefined}>{formattedDeployTime}</time>
+          )}
+          {shortSha && (
+            <>
+              {" ("}
+              {commitUrl ? (
+                <a href={commitUrl} target="_blank" rel="noopener noreferrer">
+                  {shortSha}
+                </a>
+              ) : (
+                shortSha
+              )}
+              )
+            </>
+          )}
+        </p>
       </div>
     );
   }
@@ -623,6 +691,7 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, onHide,
               {resumeAction?.label || "Download CV"}
             </a>
           </div>
+          {renderBuildMetadata()}
           <div className="intro-profile-contact" aria-label="Contact links">
             <p className="panel-label">Contact & Links</p>
             <div className="intro-profile-contact-list">
@@ -705,6 +774,13 @@ export default function IntroTerminal({ intro, theme, easterEggUnlocked, onHide,
 
 IntroTerminal.propTypes = {
   theme: PropTypes.oneOf(["dark", "light"]),
+  deployment: PropTypes.shape({
+    deployedAt: PropTypes.string,
+    runUrl: PropTypes.string,
+    sha: PropTypes.string,
+    shortSha: PropTypes.string,
+    commitUrl: PropTypes.string
+  }),
   easterEggUnlocked: PropTypes.bool,
   onHide: PropTypes.func,
   onUnhide: PropTypes.func,

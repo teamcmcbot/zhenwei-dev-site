@@ -58,6 +58,7 @@ export default function App() {
             <IntroTerminal
               intro={state.data.intro}
               theme={theme}
+              deployment={state.data.deployment}
               easterEggUnlocked={easterEggUnlocked}
               onHide={() => setLightToggleCount(0)}
               onUnhide={() => setLightToggleCount((c) => Math.max(c, 3))}
