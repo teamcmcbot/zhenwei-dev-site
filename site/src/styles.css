@@ -717,6 +717,47 @@ h3 {
   animation: terminalBlinkIn 180ms ease-out;
 }
 
+.terminal-metadata-block {
+  animation: terminalBlinkIn 180ms ease-out;
+}
+
+.terminal-metadata-list {
+  margin: 0.75rem 0 0.5rem 0;
+  padding: 0.75rem;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--terminal-panel-2) 72%, transparent);
+}
+
+.terminal-metadata-item {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  align-items: start;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+}
+
+.terminal-metadata-item:last-child {
+  border-bottom: none;
+}
+
+.metadata-label {
+  color: var(--terminal-cyan);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.metadata-value {
+  color: var(--text);
+  word-break: break-all;
+  font-variant-numeric: tabular-nums;
+}
+
 @keyframes terminalBlinkIn {
   from {
     opacity: 0;

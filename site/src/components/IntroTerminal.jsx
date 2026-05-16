@@ -199,6 +199,7 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
   const [resumeError, setResumeError] = useState("");
   const [resumeUsedFallback, setResumeUsedFallback] = useState(false);
   const [resumeProgress, setResumeProgress] = useState(0);
+  const [resumeMetadata, setResumeMetadata] = useState(null);
   const resumeAction = intro.identity.resumeAction;
   const resumeHref = resumeAction?.href || "";
   const resumeExternal = isExternalLink(resumeHref);
@@ -267,6 +268,7 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
     setResumeError("");
     setResumeUsedFallback(false);
     setResumeProgress(0);
+    setResumeMetadata(null);
     setResumeState("requesting");
 
     if (resumeMode === "local-static") {
@@ -307,6 +309,15 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
       if (!downloadUrl) {
         throw new Error("API response missing url");
       }
+
+      setResumeMetadata({
+        fileName: payload?.fileName,
+        eTag: payload?.eTag,
+        lastModified: payload?.lastModified,
+        contentLength: payload?.contentLength,
+        contentType: payload?.contentType,
+        versionId: payload?.versionId
+      });
 
       setResumeState("downloading");
       beginResumeProgressAnimation(() => {
@@ -768,6 +779,40 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
     );
   }
 
+  function formatFileSize(bytes) {
+    if (!bytes || bytes === 0) return "0 B";
+    const units = ["B", "KB", "MB", "GB"];
+    const size = Math.abs(bytes);
+    let unitIndex = 0;
+    let value = size;
+
+    while (value >= 1024 && unitIndex < units.length - 1) {
+      value /= 1024;
+      unitIndex += 1;
+    }
+
+    return `${value.toFixed(2)} ${units[unitIndex]}`;
+  }
+
+  function formatMetadataDate(dateString) {
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("en-SG", {
+        timeZone: "Asia/Singapore",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      }).format(date);
+    } catch {
+      return dateString;
+    }
+  }
+
   function renderResumeOutput() {
     const isFallbackDownload = resumeUsedFallback && resumeHref && (resumeState === "downloading" || resumeState === "done");
     let secondaryResumeLine = "Using local static resume fallback...";
@@ -806,7 +851,51 @@ ${resumeFileName || "zhenwei-seo-cv.pdf"} ${String(resumeProgress || 1).padStart
           </pre>
         )}
 
-        {resumeState === "done" && (
+        {resumeState === "done" && resumeMetadata && (
+          <div className="terminal-metadata-block">
+            <p className="terminal-line terminal-line--success">Download complete. File metadata:</p>
+            <ul className="terminal-metadata-list">
+              {resumeMetadata.fileName && (
+                <li className="terminal-metadata-item">
+                  <span className="metadata-label">File:</span>
+                  <span className="metadata-value">{resumeMetadata.fileName}</span>
+                </li>
+              )}
+              {resumeMetadata.contentLength && (
+                <li className="terminal-metadata-item">
+                  <span className="metadata-label">Size:</span>
+                  <span className="metadata-value">{formatFileSize(resumeMetadata.contentLength)}</span>
+                </li>
+              )}
+              {resumeMetadata.contentType && (
+                <li className="terminal-metadata-item">
+                  <span className="metadata-label">Type:</span>
+                  <span className="metadata-value">{resumeMetadata.contentType}</span>
+                </li>
+              )}
+              {resumeMetadata.lastModified && (
+                <li className="terminal-metadata-item">
+                  <span className="metadata-label">Modified:</span>
+                  <span className="metadata-value">{formatMetadataDate(resumeMetadata.lastModified)}</span>
+                </li>
+              )}
+              {resumeMetadata.eTag && (
+                <li className="terminal-metadata-item">
+                  <span className="metadata-label">ETag:</span>
+                  <span className="metadata-value" title="Checksum for integrity verification">{resumeMetadata.eTag}</span>
+                </li>
+              )}
+              {resumeMetadata.versionId && (
+                <li className="terminal-metadata-item">
+                  <span className="metadata-label">Version:</span>
+                  <span className="metadata-value">{resumeMetadata.versionId}</span>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+
+        {resumeState === "done" && !resumeMetadata && (
           <p className="terminal-line terminal-line--success">Download complete. Check your downloads folder.</p>
         )}
       </div>
