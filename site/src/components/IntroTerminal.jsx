@@ -14,10 +14,32 @@ function normalizeCommand(value) {
   return value.trim().toLowerCase();
 }
 
+function getResumeMode() {
+  const appEnv = (import.meta.env.VITE_APP_ENV || "").trim().toLowerCase();
+  const explicitMode = (import.meta.env.VITE_RESUME_MODE || "").trim().toLowerCase();
+
+  if (explicitMode === "api" || explicitMode === "local-static") {
+    return explicitMode;
+  }
+
+  return appEnv === "prod" ? "api" : "local-static";
+}
+
+function getResumeApiConfig() {
+  const expiry = Number.parseInt(import.meta.env.VITE_RESUME_EXPIRY_SECONDS || "300", 10);
+
+  return {
+    apiUrl: import.meta.env.VITE_RESUME_API_URL || "https://api.zhenwei.dev/get-presigned-url",
+    objectKey: import.meta.env.VITE_RESUME_OBJECT_KEY || "private-downloads/resume/zhenwei-seo-cv.pdf",
+    expirySeconds: Number.isFinite(expiry) ? expiry : 300
+  };
+}
+
 function canonicalizeCommand(value) {
   const commandAliases = {
     exp: "experience",
-    certifications: "certs"
+    certifications: "certs",
+    "get resume": "resume"
   };
 
   return commandAliases[value] || value;
@@ -132,20 +154,63 @@ function getShortSha(deployment) {
   return deployment?.shortSha || deployment?.sha?.slice(0, 7) || "";
 }
 
+function formatProgressBar(progress) {
+  const total = 19;
+  const bounded = Math.max(1, Math.min(progress, 100));
+  const filled = Math.floor((bounded / 100) * total);
+
+  if (filled >= total) {
+    return `${"=".repeat(total - 1)}>`;
+  }
+
+  return `${"=".repeat(Math.max(filled - 1, 0))}>${" ".repeat(total - filled)}`;
+}
+
+function triggerBrowserDownload(url, fileName) {
+  if (!url) {
+    return;
+  }
+
+  const anchor = globalThis.document?.createElement("a");
+
+  if (!anchor) {
+    return;
+  }
+
+  anchor.href = url;
+
+  if (fileName) {
+    anchor.download = fileName;
+  }
+
+  anchor.style.display = "none";
+  globalThis.document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
 export default function IntroTerminal({ intro, theme, deployment, easterEggUnlocked, onHide, onUnhide, skills, certifications, experiences, projects }) {
   const [activeCommand, setActiveCommand] = useState("welcome");
   const [inputValue, setInputValue] = useState("");
   const [unknownCommand, setUnknownCommand] = useState("");
   const [outputHighlighted, setOutputHighlighted] = useState(false);
   const [copiedKey, setCopiedKey] = useState("");
+  const [resumeState, setResumeState] = useState("idle");
+  const [resumeError, setResumeError] = useState("");
+  const [resumeUsedFallback, setResumeUsedFallback] = useState(false);
+  const [resumeProgress, setResumeProgress] = useState(0);
   const resumeAction = intro.identity.resumeAction;
   const resumeHref = resumeAction?.href || "";
   const resumeExternal = isExternalLink(resumeHref);
   const resumeDownload = resumeAction?.download !== false && !resumeExternal;
   const resumeFileName = resumeAction?.fileName;
+  const resumeMode = getResumeMode();
   const outputRef = useRef(null);
   const inputRef = useRef(null);
   const attentionTimeoutRef = useRef(null);
+  const resumeDoneTimeoutRef = useRef(null);
+  const resumeProgressIntervalRef = useRef(null);
+  const resumeFallbackTimeoutRef = useRef(null);
 
   const commands = intro.terminal?.commands || [];
   const commandMap = useMemo(
@@ -160,7 +225,110 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
 
   useEffect(() => () => {
     globalThis.clearTimeout(attentionTimeoutRef.current);
+    globalThis.clearTimeout(resumeDoneTimeoutRef.current);
+    globalThis.clearInterval(resumeProgressIntervalRef.current);
+    globalThis.clearTimeout(resumeFallbackTimeoutRef.current);
   }, []);
+
+  function clearResumeTimers() {
+    globalThis.clearTimeout(resumeDoneTimeoutRef.current);
+    globalThis.clearInterval(resumeProgressIntervalRef.current);
+    globalThis.clearTimeout(resumeFallbackTimeoutRef.current);
+  }
+
+  function beginResumeProgressAnimation(onComplete) {
+    const durationMs = 1000;
+    const start = Date.now();
+
+    clearResumeTimers();
+    setResumeProgress(1);
+
+    resumeProgressIntervalRef.current = globalThis.setInterval(() => {
+      const elapsed = Date.now() - start;
+      const next = Math.max(1, Math.min(100, Math.round((elapsed / durationMs) * 100)));
+
+      setResumeProgress(next);
+
+      if (elapsed >= durationMs) {
+        clearResumeTimers();
+        setResumeProgress(100);
+        onComplete?.();
+        setResumeState("done");
+      }
+    }, 50);
+  }
+
+  async function requestResumeDownload() {
+    if (resumeState === "requesting" || resumeState === "downloading") {
+      return;
+    }
+
+    clearResumeTimers();
+    setResumeError("");
+    setResumeUsedFallback(false);
+    setResumeProgress(0);
+    setResumeState("requesting");
+
+    if (resumeMode === "local-static") {
+      if (!resumeHref) {
+        setResumeError("No local resume file configured.");
+        setResumeState("error");
+        return;
+      }
+
+      setResumeState("downloading");
+      beginResumeProgressAnimation(() => {
+        triggerBrowserDownload(resumeHref, resumeFileName || undefined);
+      });
+      return;
+    }
+
+    const { apiUrl, objectKey, expirySeconds } = getResumeApiConfig();
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          objectKey,
+          expirySeconds
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const payload = await response.json();
+      const downloadUrl = payload?.url;
+
+      if (!downloadUrl) {
+        throw new Error("API response missing url");
+      }
+
+      setResumeState("downloading");
+      beginResumeProgressAnimation(() => {
+        triggerBrowserDownload(downloadUrl, payload?.fileName || resumeFileName || undefined);
+      });
+    } catch (error) {
+      clearResumeTimers();
+      const message = error instanceof Error ? error.message : "Could not reach download API.";
+      setResumeError(message);
+      setResumeUsedFallback(true);
+      setResumeState("error");
+
+      if (resumeHref) {
+        resumeFallbackTimeoutRef.current = globalThis.setTimeout(() => {
+          setResumeState("downloading");
+          beginResumeProgressAnimation(() => {
+            triggerBrowserDownload(resumeHref, resumeFileName || undefined);
+          });
+        }, 300);
+      }
+    }
+  }
 
   async function copyToClipboard(text, key) {
     try {
@@ -236,6 +404,14 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
       setUnknownCommand("");
       setActiveCommand("infra");
       scrollToSection("aws-hosting");
+      refocusTerminalInput();
+      return;
+    }
+
+    if (canonical === "resume") {
+      setUnknownCommand("");
+      setActiveCommand("resume");
+      requestResumeDownload();
       refocusTerminalInput();
       return;
     }
@@ -592,6 +768,51 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
     );
   }
 
+  function renderResumeOutput() {
+    const isFallbackDownload = resumeUsedFallback && resumeHref && (resumeState === "downloading" || resumeState === "done");
+    let secondaryResumeLine = "Using local static resume fallback...";
+
+    if (!isFallbackDownload && resumeMode === "api") {
+      secondaryResumeLine = "Connecting to resume API...";
+    }
+
+    return (
+      <div className="terminal-output-block">
+        {resumeError && (
+          <p className="terminal-line terminal-line--error">Error: {resumeError}</p>
+        )}
+
+        {resumeUsedFallback && resumeHref && (
+          <p className="terminal-line terminal-line--muted">Falling back to local resume download...</p>
+        )}
+
+        {resumeState === "error" && !resumeHref && !resumeUsedFallback && (
+          <p className="terminal-line terminal-line--muted">No local fallback is configured.</p>
+        )}
+
+        {(resumeState === "requesting" || resumeState === "downloading" || resumeState === "done") && (
+          <>
+            <p className="terminal-line terminal-line--muted">Requesting presigned URL...</p>
+            <p className="terminal-line terminal-line--muted">{secondaryResumeLine}</p>
+          </>
+        )}
+
+        {(resumeState === "downloading" || resumeState === "done") && (
+          <pre className="terminal-wget-block">
+{`HTTP request sent, awaiting response... 200 OK
+Saving to: '${resumeFileName || "zhenwei-seo-cv.pdf"}'
+
+${resumeFileName || "zhenwei-seo-cv.pdf"} ${String(resumeProgress || 1).padStart(3, " ")}%[${formatProgressBar(resumeProgress || 1)}] ${resumeProgress >= 100 ? "done" : "..."}`}
+          </pre>
+        )}
+
+        {resumeState === "done" && (
+          <p className="terminal-line terminal-line--success">Download complete. Check your downloads folder.</p>
+        )}
+      </div>
+    );
+  }
+
   function renderHideOutput() {
     return (
       <div className="terminal-output-block">
@@ -647,6 +868,8 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
         return renderContactLinkOutput("linkedin");
       case "infra":
         return renderInfraOutput();
+      case "resume":
+        return renderResumeOutput();
       case "unknown":
         return renderUnknownOutput();
       default:
@@ -684,9 +907,13 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
             <a
               className="btn btn-primary"
               href={resumeHref}
-              download={resumeDownload ? resumeFileName || true : undefined}
-              target={resumeExternal ? "_blank" : undefined}
-              rel={resumeExternal ? "noopener noreferrer" : undefined}
+              download={resumeDownload && resumeMode === "local-static" ? resumeFileName || true : undefined}
+              target={resumeExternal && resumeMode === "local-static" ? "_blank" : undefined}
+              rel={resumeExternal && resumeMode === "local-static" ? "noopener noreferrer" : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                runCommand("resume");
+              }}
             >
               {resumeAction?.label || "Download CV"}
             </a>

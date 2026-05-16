@@ -46,9 +46,13 @@ User -> Route53 -> CloudFront -> S3
 - Terraform >= 1.15
 - AWS CLI v2 configured with credentials that can bootstrap the infrastructure
 
-### GitHub repository configuration (required before first deploy)
+### GitHub Environment configuration (required before first deploy)
 
-After running `terraform apply`, configure the following in GitHub repo **Settings → Secrets and variables → Actions**:
+After running `terraform apply`, configure environment-scoped settings in GitHub:
+
+- Go to **Settings → Environments**
+- Create environments (currently `prod`, optionally `dev` later)
+- Add the following values under each environment
 
 **Secrets** (encrypted, never exposed in logs):
 
@@ -63,6 +67,11 @@ After running `terraform apply`, configure the following in GitHub repo **Settin
 | `AWS_REGION` | AWS region used in your tfvars (e.g. `ap-southeast-1`) |
 | `S3_BUCKET_NAME` | Bucket name from `terraform output s3_bucket_name` |
 | `CLOUDFRONT_DISTRIBUTION_ID` | Distribution ID from `terraform output cloudfront_distribution_id` |
+| `VITE_APP_ENV` | `prod` for prod env, `dev` for dev env |
+| `VITE_RESUME_MODE` | `api` in deployed environments |
+| `VITE_RESUME_API_URL` | Presigned URL API endpoint for that environment |
+| `VITE_RESUME_OBJECT_KEY` | `private-downloads/resume/zhenwei-seo-cv.pdf` |
+| `VITE_RESUME_EXPIRY_SECONDS` | `300` |
 
 ## 1) Bootstrap infrastructure (one-time, local)
 
@@ -83,17 +92,24 @@ terraform apply
 - cloudfront_distribution_id
 - github_deploy_role_arn
 
-## 2) Configure GitHub repository
+## 2) Configure GitHub environments
 
-In GitHub repo settings:
+In GitHub repository settings:
 
-1. Add secret:
+1. Open Settings -> Environments.
+2. Create environment `prod`.
+3. Add secret:
 - AWS_ROLE_ARN = output github_deploy_role_arn
-
-2. Add variables:
+4. Add variables:
 - AWS_REGION = same as terraform aws_region
 - S3_BUCKET_NAME = output s3_bucket_name
 - CLOUDFRONT_DISTRIBUTION_ID = output cloudfront_distribution_id
+- VITE_APP_ENV = prod
+- VITE_RESUME_MODE = api
+- VITE_RESUME_API_URL = https://api.zhenwei.dev/get-presigned-url
+- VITE_RESUME_OBJECT_KEY = private-downloads/resume/zhenwei-seo-cv.pdf
+- VITE_RESUME_EXPIRY_SECONDS = 300
+5. Optional: create environment `dev` with the same variable names but dev-specific values.
 
 ## 3) Deploy website
 
@@ -104,11 +120,52 @@ Choose one deploy mode when running the workflow manually:
 - app: build and deploy full site output
 - data: deploy JSON files only from site/public/data
 
+Choose target environment when running the workflow manually:
+
+- prod: production variables and secrets
+- dev: development variables and secrets (when configured)
+
 Deployment flow:
 
 1. Authenticates to AWS using OIDC (no stored credentials)
 2. Syncs app assets, HTML, and JSON data to S3 with cache-control split by file type
 3. Invalidates CloudFront (full path for app deploy, /data/* for data-only deploy)
+
+## 4) Local Vite environment setup
+
+Local runs do not read GitHub Actions variables. Configure local Vite values in `site/.env.local`.
+
+1. Create local env file from template:
+
+```bash
+cp site/.env.example site/.env.local
+```
+
+2. Run local development:
+
+```bash
+cd site
+npm run dev
+```
+
+3. To test resume download against deployed API locally, set in `site/.env.local`:
+
+```bash
+VITE_APP_ENV=prod
+VITE_RESUME_MODE=api
+VITE_RESUME_API_URL=https://api.zhenwei.dev/get-presigned-url
+VITE_RESUME_OBJECT_KEY=private-downloads/resume/zhenwei-seo-cv.pdf
+VITE_RESUME_EXPIRY_SECONDS=300
+```
+
+4. To return to local static fallback mode, set in `site/.env.local`:
+
+```bash
+VITE_APP_ENV=local
+VITE_RESUME_MODE=local-static
+```
+
+Note: `VITE_*` values are embedded into frontend bundles, so do not store sensitive secrets in them.
 
 ## Local pre-commit hook (Terraform fmt)
 

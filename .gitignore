@@ -47,5 +47,11 @@ terraform.rc
 site/node_modules/
 site/dist/
 
+# Local-only Vite environment files
+site/.env.local
+site/.env.development.local
+site/.env.production.local
+site/.env.test.local
+
 # Ignore Terraform state backup files created before site key migration
 terraform/state-backup-before-site-key-migration.json

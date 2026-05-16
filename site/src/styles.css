@@ -697,8 +697,34 @@ h3 {
   color: var(--terminal-cyan);
 }
 
+.terminal-line--muted {
+  color: var(--muted);
+}
+
 .terminal-line--error {
   color: var(--terminal-red);
+}
+
+.terminal-wget-block {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--terminal-panel-2) 72%, transparent);
+  color: var(--text);
+  white-space: pre-wrap;
+  line-height: 1.5;
+  animation: terminalBlinkIn 180ms ease-out;
+}
+
+@keyframes terminalBlinkIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .terminal-command-list {

@@ -1,524 +1,236 @@
 # Resume Download via Presigned URL (v2 Enhancement)
 
+## Status
+
+Backend API and presigned URL generation are already implemented in a separate repository:
+
+- API repo: https://github.com/teamcmcbot/zhenwei-dev-api
+- Endpoint: POST https://api.zhenwei.dev/get-presigned-url
+- Storage bucket: zhenwei-private-bucket
+- Resume object key: private-downloads/resume/zhenwei-seo-cv.pdf
+
+This document is updated to reflect the current live contract and the remaining integration work for this site repository.
+
+---
+
 ## Overview
 
-Replace the static PDF link with a short-lived AWS presigned URL generated on-demand.
-A Lambda function (behind API Gateway) creates the URL each time the button is clicked,
-and returns it as JSON. The browser then starts the download using that URL.
-The actual PDF lives in a **private** S3 bucket that is never publicly accessible.
+The site should request a short-lived S3 presigned URL from the existing API on demand.
+The browser then downloads the file directly from S3 using the returned URL.
 
-This is deliberately over-engineered relative to the problem — it serves as a live
-showcase of AWS serverless + IAM least-privilege patterns on a personal site.
+Benefits:
 
----
-
-## Architecture
-
-```
-Browser
-  │
-  │  GET /resume/download
-  ▼
-API Gateway (HTTP API)
-  │  throttled, CORS-restricted
-  ▼
-Lambda (Python)
-  │  generates presigned URL (TTL = 300 s)
-  │  returns 200 JSON { url, fileName }
-  ▼
-Browser uses presigned URL
-  │
-  ▼
-Private S3 Bucket  ←  manual upload only, never in git
-  (resume PDF)
-```
-
-### Why this instead of streaming through Lambda?
-
-- Lambda response payload limit is 6 MB (10 MB with response streaming).
-- A presigned URL offloads bandwidth to S3 and avoids that limit.
-- The browser downloads directly from S3 using the returned presigned URL.
-- S3 presigned URLs work even on private buckets — the signature grants temporary access.
-
-### Why JSON response instead of 302 redirect?
-
-- The architecture/security model is the same: API + Lambda still generates a short-lived presigned URL.
-- Returning `200` JSON gives the frontend reliable control over UX states (`requesting`, `downloading`, `done`, `error`).
-- Cross-origin redirect handling with `fetch()` is harder to inspect/debug in JavaScript.
-- JSON makes terminal-style output and error handling straightforward while keeping the over-engineered showcase value.
+- Private S3 object remains non-public.
+- Download bandwidth is served by S3, not Lambda.
+- Frontend can manage clear request/download/error states.
 
 ---
 
-## S3 Bucket (resume-private)
+## Architecture (Current)
 
-A **separate** bucket from the site bucket. The site bucket already has a CloudFront
-OAC policy that blocks Lambda access, so keeping the resume in its own bucket avoids
-policy conflicts and keeps concerns separated.
+```text
+Browser (zhenwei.dev)
+  |
+  | POST /get-presigned-url
+  | body: { objectKey, expirySeconds }
+  v
+API Gateway
+  |
+  v
+Lambda (in zhenwei-dev-api)
+  |
+  | generates presigned S3 GetObject URL
+  v
+Browser receives JSON { url, fileName, expiresIn, ... }
+  |
+  v
+Private S3 bucket: zhenwei-private-bucket
+  object: private-downloads/resume/zhenwei-seo-cv.pdf
+```
 
-| Setting | Value |
-|---|---|
-| Bucket name | `${project_name}-resume` |
-| Block all public access | ✅ |
-| Versioning | Enabled (keep old PDF versions) |
-| Encryption | SSE-S3 (default) |
-| Bucket policy | Deny all except Lambda execution role |
+---
 
-### Upload workflow
+## Live API Contract
 
-The PDF is uploaded **manually** via AWS CLI or Console — it is never committed to git.
+### Request
 
 ```bash
-aws s3 cp zhenwei-seo-cv.pdf \
-  s3://<bucket-name>/zhenwei-seo-cv.pdf \
-  --region ap-southeast-1
+curl -i -X POST "https://api.zhenwei.dev/get-presigned-url" \
+  -H "Origin: https://zhenwei.dev" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "objectKey": "private-downloads/resume/zhenwei-seo-cv.pdf",
+    "expirySeconds": 300
+  }'
 ```
 
----
-
-## Lambda Function
-
-**Runtime:** Python 3.12  
-**Location:** `api/resume_download/handler.py`
-
-### Handler sketch
-
-```python
-import json
-import os
-import boto3
-from botocore.exceptions import ClientError
-
-BUCKET   = os.environ["RESUME_BUCKET"]
-KEY      = os.environ["RESUME_KEY"]       # e.g. "zhenwei-seo-cv.pdf"
-FILENAME = os.environ["RESUME_FILENAME"]  # Content-Disposition filename
-TTL      = int(os.environ.get("URL_TTL_SECONDS", "300"))
-
-s3 = boto3.client("s3")
-
-def handler(event, context):
-    try:
-        url = s3.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": BUCKET,
-                "Key": KEY,
-                "ResponseContentDisposition": f'attachment; filename="{FILENAME}"',
-            },
-            ExpiresIn=TTL,
-        )
-    except ClientError as e:
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": "Could not generate download URL"}),
-        }
-
-    return {
-        "statusCode": 200,
-        "headers": {
-          "Content-Type": "application/json",
-            "Cache-Control": "no-store",
-        },
-        "body": json.dumps({
-          "url": url,
-          "fileName": FILENAME,
-          "expiresIn": TTL,
-        }),
-    }
-```
-
-### Environment variables (set in Terraform, not SSM)
-
-| Variable | Example value |
-|---|---|
-| `RESUME_BUCKET` | `zhenwei-dev-resume` |
-| `RESUME_KEY` | `zhenwei-seo-cv.pdf` |
-| `RESUME_FILENAME` | `zhenwei-seo-cv.pdf` |
-| `URL_TTL_SECONDS` | `300` |
-
-Note:
-
-- Keep CORS configuration in API Gateway HTTP API configuration.
-- Keep Lambda focused on URL generation and response payload.
-
----
-
-## IAM
-
-### Lambda execution role policy (least-privilege)
+### Response (200)
 
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "GeneratePresignedUrl",
-      "Effect": "Allow",
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::${resume_bucket_name}/${resume_key}"
-    },
-    {
-      "Sid": "CloudWatchLogs",
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "arn:aws:logs:*:*:*"
-    }
-  ]
+  "url": "https://zhenwei-private-bucket.s3.amazonaws.com/...signed...",
+  "bucketName": "zhenwei-private-bucket",
+  "objectKey": "private-downloads/resume/zhenwei-seo-cv.pdf",
+  "versionId": null,
+  "fileName": "zhenwei-seo-cv.pdf",
+  "expiresIn": 300
 }
 ```
 
-The existing GitHub OIDC deploy role (`iam.tf`) will need additional permissions
-to deploy the Lambda and API Gateway resources:
+Observed response headers include:
 
-```
-lambda:CreateFunction, lambda:UpdateFunctionCode, lambda:UpdateFunctionConfiguration,
-lambda:GetFunction, lambda:AddPermission,
-apigatewayv2:CreateApi, apigatewayv2:CreateIntegration, apigatewayv2:CreateRoute,
-apigatewayv2:CreateStage, apigatewayv2:DeployApi,
-iam:PassRole  (scoped to the Lambda execution role ARN)
-```
+- content-type: application/json
+- access-control-allow-origin: https://zhenwei.dev
+- vary: Origin
 
----
+Notes:
 
-## API Gateway (HTTP API)
-
-HTTP API (v2) is preferred over REST API — lower cost, lower latency, built-in CORS.
-
-| Setting | Value |
-|---|---|
-| Type | HTTP API |
-| Route | `GET /resume/download` |
-| Integration | Lambda proxy |
-| CORS origins | `https://zhenwei.dev`, `https://www.zhenwei.dev` |
-| Throttle (stage default) | 10 req/s burst, 5 req/s rate |
-| Logging | CloudWatch, INFO level |
-
-### Optional: WAF
-
-A WAF Web ACL with a rate-based rule (`100 req / 5 min per IP`) can be attached to
-the API Gateway stage. Low priority for v2 — the throttle above is sufficient for a
-personal site.
+- Method is POST (not GET).
+- The endpoint expects objectKey and expirySeconds in JSON body.
+- The API currently supports zhenwei.dev origin based on sampled response.
 
 ---
 
-## Terraform Resources
+## S3 Source of Truth
 
-New file: `terraform/resume_api.tf`
+- Bucket: zhenwei-private-bucket
+- Folder prefix: private-downloads/
+- Resume key used by frontend request: private-downloads/resume/zhenwei-seo-cv.pdf
 
-```hcl
-# Private S3 bucket for resume PDF
-resource "aws_s3_bucket" "resume" { ... }
-resource "aws_s3_bucket_versioning" "resume" { ... }
-resource "aws_s3_bucket_public_access_block" "resume" { ... }
-resource "aws_s3_bucket_policy" "resume" { ... }   # deny all except lambda role
-
-# Lambda
-resource "aws_lambda_function" "resume_download" { ... }
-resource "aws_iam_role" "resume_lambda" { ... }
-resource "aws_iam_role_policy" "resume_lambda" { ... }
-resource "aws_cloudwatch_log_group" "resume_lambda" { ... }
-
-# API Gateway HTTP API
-resource "aws_apigatewayv2_api" "resume" { ... }
-resource "aws_apigatewayv2_integration" "resume" { ... }
-resource "aws_apigatewayv2_route" "resume" { ... }
-resource "aws_apigatewayv2_stage" "default" { ... }
-resource "aws_lambda_permission" "apigw_resume" { ... }
-```
-
-Output the invoke URL so it can be configured in deployment environment variables:
-
-```hcl
-output "resume_api_url" {
-  value = "${aws_apigatewayv2_api.resume.api_endpoint}/resume/download"
-}
-```
-
-Use this output for `VITE_RESUME_API_URL` in CI/CD for dev/prod builds.
-
----
-
-## Frontend Change (post-deploy)
-
-After the API is deployed, keep `resumeAction` in `site/public/data/intro.json` for label/fallback,
-and move environment-dependent behavior to Vite environment variables.
-
-Recommended `resumeAction` shape:
-
-```json
-"resumeAction": {
-  "label": "Download CV",
-  "href": "/assets/resume/zhenwei-seo-cv.pdf",
-  "download": true,
-  "fileName": "zhenwei-seo-cv.pdf"
-}
-```
-
-The API URL should come from environment variables (not hard-coded in JSON).
-
-### Environment behavior (local/dev/prod)
-
-Use Vite env variables:
+Example verification:
 
 ```bash
-# .env.local (developer machine)
+aws s3 ls s3://zhenwei-private-bucket --recursive
+```
+
+Expected relevant item:
+
+```text
+private-downloads/resume/zhenwei-seo-cv.pdf
+```
+
+---
+
+## Frontend Integration for This Repo
+
+Current site status:
+
+- Resume CTA in Intro panel triggers the hidden `resume` command flow.
+- `resume` / `get resume` are supported as hidden typed commands (not listed in command deck/help).
+- API mode falls back automatically to local static download when API fetch fails.
+
+Integration target:
+
+1. Keep local fallback in site/public/data/intro.json resumeAction.
+2. In dev/prod mode, call API endpoint and trigger download from returned URL.
+3. Keep resume command hidden from visible command lists; trigger primarily from Download CV button.
+
+### Suggested environment variables
+
+Configure these in GitHub Environment variables (for example `prod`, and `dev` later), using the same names with environment-specific values.
+
+Current practical strategy for this site repo:
+
+- Local/testing default: local-static mode.
+- Production: api mode using production endpoint.
+- Dev API endpoint: optional/manual only (no site dev CI/CD yet).
+
+```bash
+# Local developer machine
 VITE_APP_ENV=local
 VITE_RESUME_MODE=local-static
 VITE_RESUME_API_URL=
+VITE_RESUME_OBJECT_KEY=private-downloads/resume/zhenwei-seo-cv.pdf
+VITE_RESUME_EXPIRY_SECONDS=300
 
-# .env.development (shared dev environment build)
+# Development testing (optional manual override)
+# Use only when you explicitly want to test against dev API from local site build.
 VITE_APP_ENV=dev
 VITE_RESUME_MODE=api
-VITE_RESUME_API_URL=https://api-dev.zhenwei.dev/resume/download
+VITE_RESUME_API_URL=https://4tm8h7iot5.execute-api.ap-southeast-1.amazonaws.com/get-presigned-url
+VITE_RESUME_OBJECT_KEY=private-downloads/resume/zhenwei-seo-cv.pdf
+VITE_RESUME_EXPIRY_SECONDS=300
 
-# .env.production (production build)
+# Production deployment
 VITE_APP_ENV=prod
 VITE_RESUME_MODE=api
-VITE_RESUME_API_URL=https://api.zhenwei.dev/resume/download
+VITE_RESUME_API_URL=https://api.zhenwei.dev/get-presigned-url
+VITE_RESUME_OBJECT_KEY=private-downloads/resume/zhenwei-seo-cv.pdf
+VITE_RESUME_EXPIRY_SECONDS=300
 ```
 
-Recommended behavior matrix:
+### Recommended mode resolution
 
-| Environment | Mode | Button behavior |
-|---|---|---|
-| local | `local-static` | Download from `/assets/resume/...` in local project files |
-| dev | `api` | Call API, get presigned URL JSON, trigger browser download |
-| prod | `api` | Call API, get presigned URL JSON, trigger browser download |
+For now, keep logic intentionally simple:
 
-Fallback strategy:
+1. If VITE_APP_ENV=prod: use API mode (VITE_RESUME_MODE=api).
+2. Else: default to local-static mode.
+3. Optional: allow explicit override to API mode for manual dev testing.
 
-- Local: always use static file fallback (`/assets/resume/...`).
-- Dev/Prod: API-first. Optional emergency fallback to static only if you intentionally ship a public copy (not recommended for this v2 goal).
+This matches current delivery setup where site dev CI/CD is not yet implemented.
 
-This gives clean local development while preserving private-bucket behavior in deployed environments.
-
-Optionally set up custom domains (`api-dev.zhenwei.dev`, `api.zhenwei.dev`) mapped to API
-Gateway stages. This keeps URLs clean and avoids exposing raw `execute-api` hostnames.
-
----
-
-## Deployment Steps (when ready)
-
-1. Write `api/resume_download/handler.py` (sketch above).
-2. Add `terraform/resume_api.tf` with all resources.
-3. Extend the GitHub OIDC deploy role policy in `terraform/iam.tf`.
-4. `terraform plan` → review → `terraform apply`.
-5. Upload PDF: `aws s3 cp ... s3://<resume-bucket>/zhenwei-seo-cv.pdf`.
-6. Set CI/CD environment variables (`VITE_APP_ENV`, `VITE_RESUME_MODE`, `VITE_RESUME_API_URL`).
-7. `npm run build` → push → CI deploys site.
-8. Verify end-to-end: button/command → API → `200 {url,fileName}` → S3 download.
-
----
-
-## Files to Create / Modify
-
-| File | Action |
-|---|---|
-| `api/resume_download/handler.py` | Create |
-| `api/resume_download/requirements.txt` | Create (boto3 only, usually pre-installed in Lambda) |
-| `terraform/resume_api.tf` | Create |
-| `terraform/iam.tf` | Modify — extend deploy role permissions |
-| `terraform/variables.tf` | Modify — add `resume_key`, `url_ttl_seconds` variables |
-| `terraform/outputs.tf` | Modify — add `resume_api_url` output |
-| `site/public/data/intro.json` | Keep static fallback path/label for local fallback |
-| `site/public/assets/resume/README.md` | Remove or keep as placeholder |
-| `.env.local` / CI environment vars | Add environment-specific resume mode and API URL |
-
----
-
-## Terminal UX — `resume` Command
-
-Rather than a plain button click, the download is surfaced as a **terminal command**
-that fits the existing interactive terminal in `IntroTerminal.jsx`.
-
-### User flow
-
-```
-visitor@zhenwei.dev:~$ resume
-
-> Requesting presigned URL from S3...
-> Connecting to api.zhenwei.dev...
-
---2026-05-05 12:00:01--  https://zhenwei-dev-resume.s3.ap-southeast-1.amazonaws.com/zhenwei-seo-cv.pdf
-Resolving zhenwei-dev-resume.s3.ap-southeast-1.amazonaws.com... 52.xx.xx.xx
-Connecting to zhenwei-dev-resume.s3... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 182341 (178K) [application/pdf]
-Saving to: 'zhenwei-seo-cv.pdf'
-
-zhenwei-seo-cv.pdf    100%[===================>] 178K  --.-KB/s    in 0.3s
-
-> Download complete. Check your downloads folder.
-```
-
-On error:
-
-```
-visitor@zhenwei.dev:~$ resume
-
-> Requesting presigned URL from S3...
-> Error: Could not reach download API. Try the button below or check back later.
-```
-
-### Accepted command names
-
-Add both `resume` and `get resume` as recognized inputs (via `commandAliases` in
-`canonicalizeCommand`):
-
-```js
-const commandAliases = {
-  exp: "experience",
-  certifications: "certs",
-  "get resume": "resume",   // multi-word alias
-};
-```
-
-Register `resume` in `intro.json` commands array so it appears in `help` and the
-command deck:
+### Frontend request payload
 
 ```json
 {
-  "name": "resume",
-  "label": "resume",
-  "description": "Download CV (PDF)"
+  "objectKey": "private-downloads/resume/zhenwei-seo-cv.pdf",
+  "expirySeconds": 300
 }
 ```
 
-### State model
+### Frontend success flow
 
-The download flow needs its own async state, separate from `activeCommand`:
+1. POST to VITE_RESUME_API_URL.
+2. Parse JSON and read url and fileName.
+3. Create temporary anchor with href=url and download=fileName, then click.
+4. Show terminal-style success output.
 
-| State | Terminal shows |
-|---|---|
-| `idle` | nothing / previous output |
-| `requesting` | "Requesting presigned URL..." spinner line |
-| `downloading` | animated wget-style block (fake progress, then 100%) |
-| `done` | success line + "Check your downloads folder" |
-| `error` | error line + fallback link |
+### Error flow
 
-Use a dedicated `useState` for this: `const [resumeState, setResumeState] = useState("idle")`.
-
-The download state is **independent** of `activeCommand` — switching to another command
-resets the view, but the actual `fetch()` + `<a download>` trigger continues in the
-background.
-
-### Implementation sketch (`renderResumeOutput`)
-
-```jsx
-function renderResumeOutput() {
-  return (
-    <div className="terminal-output-block">
-      {resumeState === "idle" && null}
-
-      {(resumeState === "requesting" || resumeState === "downloading" || resumeState === "done") && (
-        <>
-          <p className="terminal-line terminal-line--muted">
-            Requesting presigned URL from S3...
-          </p>
-          <p className="terminal-line terminal-line--muted">
-            Connecting to api.zhenwei.dev...
-          </p>
-        </>
-      )}
-
-      {(resumeState === "downloading" || resumeState === "done") && (
-        <pre className="terminal-wget-block">
-{`--${timestamp}--  https://...s3.amazonaws.com/zhenwei-seo-cv.pdf
-Resolving ...s3.amazonaws.com... resolved.
-Connecting... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: ~180K [application/pdf]
-Saving to: 'zhenwei-seo-cv.pdf'
-
-zhenwei-seo-cv.pdf    100%[===================>] 178K  in 0.3s`}
-        </pre>
-      )}
-
-      {resumeState === "done" && (
-        <p className="terminal-line terminal-line--success">
-          Download complete. Check your downloads folder.
-        </p>
-      )}
-
-      {resumeState === "error" && (
-        <>
-          <p className="terminal-line terminal-line--error">
-            Error: Could not reach download API.
-          </p>
-          <p className="terminal-line">
-            Try the <a href={resumeHref} download={resumeFileName}>direct link</a> instead.
-          </p>
-        </>
-      )}
-    </div>
-  );
-}
-```
-
-### Triggering the download
-
-When `runCommand("resume")` is called:
-
-1. `setActiveCommand("resume")` — shows the output block.
-2. `setResumeState("requesting")`.
-3. `fetch(API_URL)` — API returns `200` JSON with `{ url, fileName }`.
-4. Create a temporary `<a>` with `href=url` and `download=fileName`, then `.click()`.
-5. On success: `setResumeState("downloading")` → short `setTimeout` → `setResumeState("done")`.
-6. On failure: `setResumeState("error")`.
- 
-If `VITE_RESUME_MODE=local-static`, skip API and use existing static `resumeAction.href` directly.
-
-### JSON response approach (recommended)
-
-Lambda returns `200 + JSON`:
-
-```python
-return {
-    "statusCode": 200,
-    "headers": { "Content-Type": "application/json", ... },
-    "body": json.dumps({"url": url, "fileName": FILENAME}),
-}
-```
-
-Frontend:
-
-```js
-const { url, fileName } = await res.json();
-const a = document.createElement("a");
-a.href = url;
-a.download = fileName;
-a.click();
-```
-
-This is easier to handle error states from and keeps frontend behavior deterministic.
-
-### Animated wget progress (CSS)
-
-The `terminal-wget-block` can use a CSS animation to reveal the progress bar
-character-by-character using `clip-path` or a `max-width` transition on the
-`[===================>]` span, giving a realistic "filling" effect before snapping
-to 100%.
-
-### Files to touch (frontend side)
-
-| File | Change |
-|---|---|
-| `site/src/components/IntroTerminal.jsx` | Add `resumeState` state, `renderResumeOutput()`, `resume` case in `renderOutput()`, download trigger logic in `runCommand()` |
-| `site/public/data/intro.json` | Add `resume` entry to `terminal.commands` array; keep static fallback `resumeAction.href` |
-| `site/src/styles.css` | Add `.terminal-wget-block`, `.terminal-wget-bar` animation styles |
+1. If API call fails, show terminal error state.
+2. Then auto-fallback to local resumeAction.href download flow.
+3. Keep error context visible in terminal output while fallback proceeds.
 
 ---
 
-## v1 Status
+## Terminal UX Plan (Still Valid)
 
-Current v1 ships with a **static path** pointing to `/assets/resume/zhenwei-seo-cv.pdf`.
+Resume logic is implemented inside IntroTerminal and includes get resume alias.
 
-v2 recommendation keeps that path as local fallback only:
+The command is intentionally hidden from the command deck/help list.
 
-- Local development: static file fallback is allowed and convenient.
-- Deployed dev/prod: API + presigned URL flow is the primary behavior.
+State model:
 
-This keeps local DX simple while preserving the private-bucket showcase in cloud environments.
+- idle
+- requesting
+- downloading
+- done
+- error
+
+The download lifecycle should be independent from activeCommand so the async request can finish safely.
+
+---
+
+## Files to Update in This Repo
+
+| File | Action |
+|---|---|
+| site/src/components/IntroTerminal.jsx | Implemented: resume command behavior, API POST flow, fallback handling, and terminal output states |
+| site/public/data/intro.json | Keep static resumeAction fallback; resume command remains hidden from terminal.commands |
+| site/src/styles.css | Implemented: terminal download block and state styling |
+| site/.env.local (local only) | Configure local resume mode variables |
+
+Cross-repo reference only:
+
+- API/Lambda/IAM/API Gateway details are maintained in zhenwei-dev-api.
+
+---
+
+## What Changed From Previous Draft
+
+- Updated route from GET /resume/download to POST /get-presigned-url.
+- Replaced planned bucket naming with actual bucket and object key.
+- Marked backend implementation as completed in external API repo.
+- Narrowed this repo plan to frontend integration work.
+- Removed repo-local Terraform implementation steps that are no longer source-of-truth for the backend API.
+- Clarified current environment strategy: prod uses API, non-prod defaults to local-static, with optional manual dev API override.
