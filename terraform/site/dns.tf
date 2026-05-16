@@ -50,6 +50,31 @@ resource "aws_route53_record" "site_aaaa" {
   }
 }
 
+# Create CNAME/alias records for www subdomain to point to CloudFront.
+resource "aws_route53_record" "site_www_a" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "site_www_aaaa" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.${var.domain_name}"
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
 # Optionally create a TXT record for Google Search Console site ownership verification if the value is provided.
 resource "aws_route53_record" "google_site_verification" {
   count = local.create_google_site_verification_txt ? 1 : 0
