@@ -843,60 +843,62 @@ export default function IntroTerminal({ intro, theme, deployment, easterEggUnloc
         )}
 
         {(resumeState === "downloading" || resumeState === "done") && (
-          <pre className="terminal-wget-block">
+          <>
+            <pre className="terminal-wget-block">
 {`HTTP request sent, awaiting response... 200 OK
 Saving to: '${resumeFileName || "zhenwei-seo-cv.pdf"}'
 
 ${resumeFileName || "zhenwei-seo-cv.pdf"} ${String(resumeProgress || 1).padStart(3, " ")}%[${formatProgressBar(resumeProgress || 1)}] ${resumeProgress >= 100 ? "done" : "..."}`}
-          </pre>
-        )}
+            </pre>
 
-        {resumeState === "done" && resumeMetadata && (
-          <div className="terminal-metadata-block">
-            <p className="terminal-line terminal-line--success">Download complete. File metadata:</p>
-            <ul className="terminal-metadata-list">
-              {resumeMetadata.fileName && (
-                <li className="terminal-metadata-item">
-                  <span className="metadata-label">File:</span>
-                  <span className="metadata-value">{resumeMetadata.fileName}</span>
-                </li>
-              )}
-              {resumeMetadata.contentLength && (
-                <li className="terminal-metadata-item">
-                  <span className="metadata-label">Size:</span>
-                  <span className="metadata-value">{formatFileSize(resumeMetadata.contentLength)}</span>
-                </li>
-              )}
-              {resumeMetadata.contentType && (
-                <li className="terminal-metadata-item">
-                  <span className="metadata-label">Type:</span>
-                  <span className="metadata-value">{resumeMetadata.contentType}</span>
-                </li>
-              )}
-              {resumeMetadata.lastModified && (
-                <li className="terminal-metadata-item">
-                  <span className="metadata-label">Modified:</span>
-                  <span className="metadata-value">{formatMetadataDate(resumeMetadata.lastModified)}</span>
-                </li>
-              )}
-              {resumeMetadata.eTag && (
-                <li className="terminal-metadata-item">
-                  <span className="metadata-label">ETag:</span>
-                  <span className="metadata-value" title="Checksum for integrity verification">{resumeMetadata.eTag}</span>
-                </li>
-              )}
-              {resumeMetadata.versionId && (
-                <li className="terminal-metadata-item">
-                  <span className="metadata-label">Version:</span>
-                  <span className="metadata-value">{resumeMetadata.versionId}</span>
-                </li>
-              )}
-            </ul>
-          </div>
-        )}
+            {resumeState === "done" && resumeMetadata && (
+              <div className="terminal-metadata-block">
+                <p className="terminal-line terminal-line--success">File metadata:</p>
+                <ul className="terminal-metadata-list">
+                  {resumeMetadata.fileName && (
+                    <li className="terminal-metadata-item">
+                      <span className="metadata-label">File:</span>
+                      <span className="metadata-value">{resumeMetadata.fileName}</span>
+                    </li>
+                  )}
+                  {resumeMetadata.contentLength && (
+                    <li className="terminal-metadata-item">
+                      <span className="metadata-label">Size:</span>
+                      <span className="metadata-value">{formatFileSize(resumeMetadata.contentLength)}</span>
+                    </li>
+                  )}
+                  {resumeMetadata.contentType && (
+                    <li className="terminal-metadata-item">
+                      <span className="metadata-label">Type:</span>
+                      <span className="metadata-value">{resumeMetadata.contentType}</span>
+                    </li>
+                  )}
+                  {resumeMetadata.lastModified && (
+                    <li className="terminal-metadata-item">
+                      <span className="metadata-label">Modified:</span>
+                      <span className="metadata-value">{formatMetadataDate(resumeMetadata.lastModified)}</span>
+                    </li>
+                  )}
+                  {resumeMetadata.eTag && (
+                    <li className="terminal-metadata-item">
+                      <span className="metadata-label">ETag:</span>
+                      <span className="metadata-value" title="Checksum for integrity verification">{resumeMetadata.eTag}</span>
+                    </li>
+                  )}
+                  {resumeMetadata.versionId && (
+                    <li className="terminal-metadata-item">
+                      <span className="metadata-label">Version:</span>
+                      <span className="metadata-value">{resumeMetadata.versionId}</span>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
 
-        {resumeState === "done" && !resumeMetadata && (
-          <p className="terminal-line terminal-line--success">Download complete. Check your downloads folder.</p>
+            {resumeState === "done" && (
+              <p className="terminal-line terminal-line--success">Download complete. Check your downloads folder.</p>
+            )}
+          </>
         )}
       </div>
     );
